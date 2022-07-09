@@ -26,9 +26,7 @@ Note that this example may create resources which will incur monetary charges on
 
 ## Providers
 
-| Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.0 |
+No providers.
 
 ## Modules
 
@@ -40,9 +38,7 @@ Note that this example may create resources which will incur monetary charges on
 
 ## Resources
 
-| Name | Type |
-|------|------|
-| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+No resources.
 
 ## Inputs
 

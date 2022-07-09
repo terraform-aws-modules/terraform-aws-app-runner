@@ -7,13 +7,28 @@ locals {
   name   = "app-runner-ex-${replace(basename(path.cwd), "_", "-")}"
 
   tags = {
-    Name       = local.name
     Example    = local.name
     Repository = "https://github.com/clowdhaus/terraform-aws-app-runner"
   }
 }
 
-data "aws_caller_identity" "current" {}
+################################################################################
+# App Runner Module
+################################################################################
+
+module "app_runner_disabled" {
+  source = "../.."
+
+  create = false
+}
+
+module "app_runner" {
+  source = "../.."
+
+  create = false
+
+  tags = local.tags
+}
 
 ################################################################################
 # Supporting Resources
@@ -33,24 +48,6 @@ module "vpc" {
   enable_nat_gateway      = false
   single_nat_gateway      = true
   map_public_ip_on_launch = false
-
-  tags = local.tags
-}
-
-################################################################################
-# App Runner Module
-################################################################################
-
-module "app_runner_disabled" {
-  source = "../.."
-
-  create = false
-}
-
-module "app_runner" {
-  source = "../.."
-
-  create = false
 
   tags = local.tags
 }
