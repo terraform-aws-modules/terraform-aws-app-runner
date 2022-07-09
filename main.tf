@@ -5,7 +5,7 @@
 resource "aws_apprunner_service" "this" {
   count = var.create ? 1 : 0
 
-  auto_scaling_configuration_arn = var.auto_scaling_configuration_arn
+  auto_scaling_configuration_arn = var.create_autoscaling_configuration ? aws_apprunner_auto_scaling_configuration_version.this[0].arn : var.autoscaling_configuration_arn
 
   dynamic "encryption_configuration" {
     for_each = length(var.encryption_configuration) > 0 ? [var.encryption_configuration] : []
@@ -54,11 +54,11 @@ resource "aws_apprunner_service" "this" {
   }
 
   dynamic "observability_configuration" {
-    for_each = length(var.observability_configuration) > 0 ? [var.observability_configuration] : []
+    for_each = var.enable_observability_configuration ? [1] : []
 
     content {
-      observability_configuration_arn = observability_configuration.value.observability_configuration_arn
-      observability_enabled           = observability_configuration.value.observability_enabled
+      observability_configuration_arn = aws_apprunner_observability_configuration.this[0].arn
+      observability_enabled           = var.enable_observability_configuration
     }
   }
 
@@ -172,13 +172,73 @@ resource "aws_apprunner_connection" "this" {
 ################################################################################
 
 resource "aws_apprunner_auto_scaling_configuration_version" "this" {
-  count = var.create && var.enable_autoscaling ? 1 : 0
+  count = var.create && var.create_autoscaling_configuration ? 1 : 0
 
   auto_scaling_configuration_name = try(coalesce(var.autoscaling_name, var.service_name), "")
 
   max_concurrency = var.autoscaling_max_concurrency
   max_size        = var.autoscaling_max_size
   min_size        = var.autoscaling_min_size
+
+  tags = var.tags
+}
+
+################################################################################
+# Custom Domain Association
+################################################################################
+
+resource "aws_apprunner_custom_domain_association" "this" {
+  count = var.create && var.create_custom_domain_association ? 1 : 0
+
+  domain_name          = var.domain_name
+  enable_www_subdomain = var.enable_www_subdomain
+  service_arn          = aws_apprunner_service.this[0].arn
+}
+
+resource "aws_route53_record" "validation" {
+  for_each = {
+    for dvo in aws_apprunner_custom_domain_association.this[0].certificate_validation_records : dvo.name => {
+      name   = dvo.name
+      record = dvo.value
+      type   = dvo.type
+    } if var.create && var.create_custom_domain_association
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = var.hosted_zone_id
+}
+
+resource "aws_route53_record" "cname" {
+  count = var.create && var.create_custom_domain_association ? 1 : 0
+
+  allow_overwrite = true
+  name            = var.domain_name
+  records         = [aws_apprunner_custom_domain_association.this[0].dns_target]
+  ttl             = 3600
+  type            = "CNAME"
+  zone_id         = var.hosted_zone_id
+}
+
+################################################################################
+# Observability Configuration
+################################################################################
+
+resource "aws_apprunner_observability_configuration" "this" {
+  count = var.create && var.enable_observability_configuration ? 1 : 0
+
+  observability_configuration_name = try(coalesce(var.observability_configuration_name, var.service_name), "")
+
+  dynamic "trace_configuration" {
+    for_each = length(var.observability_trace_configuration) > 0 ? [var.observability_trace_configuration] : []
+
+    content {
+      vendor = try(trace_configuration.value.vendor, "AWSXRAY")
+    }
+  }
 
   tags = var.tags
 }
