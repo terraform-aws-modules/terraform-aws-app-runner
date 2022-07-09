@@ -26,7 +26,9 @@ Note that this example may create resources which will incur monetary charges on
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.0 |
 
 ## Modules
 
@@ -34,11 +36,14 @@ No providers.
 |------|--------|---------|
 | <a name="module_app_runner"></a> [app\_runner](#module\_app\_runner) | ../.. | n/a |
 | <a name="module_app_runner_disabled"></a> [app\_runner\_disabled](#module\_app\_runner\_disabled) | ../.. | n/a |
+| <a name="module_security_group"></a> [security\_group](#module\_security\_group) | terraform-aws-modules/security-group/aws | ~> 4.0 |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | ~> 3.0 |
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [aws_apprunner_connection.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apprunner_connection) | resource |
 
 ## Inputs
 
@@ -46,7 +51,34 @@ No inputs.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_access_iam_role_arn"></a> [access\_iam\_role\_arn](#output\_access\_iam\_role\_arn) | The Amazon Resource Name (ARN) specifying the IAM role |
+| <a name="output_access_iam_role_name"></a> [access\_iam\_role\_name](#output\_access\_iam\_role\_name) | The name of the IAM role |
+| <a name="output_access_iam_role_unique_id"></a> [access\_iam\_role\_unique\_id](#output\_access\_iam\_role\_unique\_id) | Stable and unique string identifying the IAM role |
+| <a name="output_autoscaling_configuration_arn"></a> [autoscaling\_configuration\_arn](#output\_autoscaling\_configuration\_arn) | ARN of this auto scaling configuration version |
+| <a name="output_autoscaling_configuration_latest"></a> [autoscaling\_configuration\_latest](#output\_autoscaling\_configuration\_latest) | Whether the auto scaling configuration has the highest `auto_scaling_configuration_revision` among all configurations that share the same `auto_scaling_configuration_name` |
+| <a name="output_autoscaling_configuration_revision"></a> [autoscaling\_configuration\_revision](#output\_autoscaling\_configuration\_revision) | The revision of this auto scaling configuration |
+| <a name="output_autoscaling_configuration_status"></a> [autoscaling\_configuration\_status](#output\_autoscaling\_configuration\_status) | The current state of the auto scaling configuration. An INACTIVE configuration revision has been deleted and can't be used. It is permanently removed some time after deletion |
+| <a name="output_cloudwatch_log_group_arn"></a> [cloudwatch\_log\_group\_arn](#output\_cloudwatch\_log\_group\_arn) | Arn of cloudwatch log group created |
+| <a name="output_cloudwatch_log_group_name"></a> [cloudwatch\_log\_group\_name](#output\_cloudwatch\_log\_group\_name) | Name of cloudwatch log group created |
+| <a name="output_custom_domain_association_certificate_validation_records"></a> [custom\_domain\_association\_certificate\_validation\_records](#output\_custom\_domain\_association\_certificate\_validation\_records) | A set of certificate CNAME records used for this domain name |
+| <a name="output_custom_domain_association_dns_target"></a> [custom\_domain\_association\_dns\_target](#output\_custom\_domain\_association\_dns\_target) | The App Runner subdomain of the App Runner service. The custom domain name is mapped to this target name. Attribute only available if resource created (not imported) with Terraform |
+| <a name="output_custom_domain_association_id"></a> [custom\_domain\_association\_id](#output\_custom\_domain\_association\_id) | The `domain_name` and `service_arn` separated by a comma (`,`) |
+| <a name="output_instance_iam_role_arn"></a> [instance\_iam\_role\_arn](#output\_instance\_iam\_role\_arn) | The Amazon Resource Name (ARN) specifying the IAM role |
+| <a name="output_instance_iam_role_name"></a> [instance\_iam\_role\_name](#output\_instance\_iam\_role\_name) | The name of the IAM role |
+| <a name="output_instance_iam_role_unique_id"></a> [instance\_iam\_role\_unique\_id](#output\_instance\_iam\_role\_unique\_id) | Stable and unique string identifying the IAM role |
+| <a name="output_observability_configuration_arn"></a> [observability\_configuration\_arn](#output\_observability\_configuration\_arn) | ARN of this observability configuration |
+| <a name="output_observability_configuration_latest"></a> [observability\_configuration\_latest](#output\_observability\_configuration\_latest) | Whether the observability configuration has the highest `observability_configuration_revision` among all configurations that share the same `observability_configuration_name` |
+| <a name="output_observability_configuration_revision"></a> [observability\_configuration\_revision](#output\_observability\_configuration\_revision) | The revision of the observability configuration |
+| <a name="output_observability_configuration_status"></a> [observability\_configuration\_status](#output\_observability\_configuration\_status) | The current state of the observability configuration. An `INACTIVE` configuration revision has been deleted and can't be used. It is permanently removed some time after deletion |
+| <a name="output_service_arn"></a> [service\_arn](#output\_service\_arn) | The Amazon Resource Name (ARN) of the service |
+| <a name="output_service_id"></a> [service\_id](#output\_service\_id) | An alphanumeric ID that App Runner generated for this service. Unique within the AWS Region |
+| <a name="output_service_status"></a> [service\_status](#output\_service\_status) | The current state of the App Runner service |
+| <a name="output_service_url"></a> [service\_url](#output\_service\_url) | A subdomain URL that App Runner generated for this service. You can use this URL to access your service web application |
+| <a name="output_vpc_connector_arn"></a> [vpc\_connector\_arn](#output\_vpc\_connector\_arn) | The Amazon Resource Name (ARN) of VPC connector |
+| <a name="output_vpc_connector_revision"></a> [vpc\_connector\_revision](#output\_vpc\_connector\_revision) | The revision of VPC connector. It's unique among all the active connectors ("Status": "ACTIVE") that share the same Name |
+| <a name="output_vpc_connector_status"></a> [vpc\_connector\_status](#output\_vpc\_connector\_status) | The current state of the VPC connector. If the status of a connector revision is INACTIVE, it was deleted and can't be used. Inactive connector revisions are permanently removed some time after they are deleted |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 Apache-2.0 Licensed. See [LICENSE](https://github.com/clowdhaus/terraform-aws-app-runner/blob/main/LICENSE).

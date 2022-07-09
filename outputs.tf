@@ -2,6 +2,77 @@
 # Service
 ################################################################################
 
+output "service_arn" {
+  description = "The Amazon Resource Name (ARN) of the service"
+  value       = try(aws_apprunner_service.this[0].arn, null)
+}
+
+output "service_id" {
+  description = "An alphanumeric ID that App Runner generated for this service. Unique within the AWS Region"
+  value       = try(aws_apprunner_service.this[0].service_id, null)
+}
+
+output "service_url" {
+  description = "A subdomain URL that App Runner generated for this service. You can use this URL to access your service web application"
+  value       = try(aws_apprunner_service.this[0].service_url, null)
+}
+
+output "service_status" {
+  description = "The current state of the App Runner service"
+  value       = try(aws_apprunner_service.this[0].status, null)
+}
+
+################################################################################
+# CloudWatch Log Group
+################################################################################
+
+output "cloudwatch_log_group_name" {
+  description = "Name of cloudwatch log group created"
+  value       = try(aws_cloudwatch_log_group.this[0].name, "")
+}
+
+output "cloudwatch_log_group_arn" {
+  description = "Arn of cloudwatch log group created"
+  value       = try(aws_cloudwatch_log_group.this[0].arn, "")
+}
+
+################################################################################
+# IAM Role - Access
+################################################################################
+
+output "access_iam_role_name" {
+  description = "The name of the IAM role"
+  value       = try(aws_iam_role.access[0].name, null)
+}
+
+output "access_iam_role_arn" {
+  description = "The Amazon Resource Name (ARN) specifying the IAM role"
+  value       = try(aws_iam_role.access[0].arn, null)
+}
+
+output "access_iam_role_unique_id" {
+  description = "Stable and unique string identifying the IAM role"
+  value       = try(aws_iam_role.access[0].unique_id, null)
+}
+
+################################################################################
+# IAM Role - Instance
+################################################################################
+
+output "instance_iam_role_name" {
+  description = "The name of the IAM role"
+  value       = try(aws_iam_role.instance[0].name, null)
+}
+
+output "instance_iam_role_arn" {
+  description = "The Amazon Resource Name (ARN) specifying the IAM role"
+  value       = try(aws_iam_role.instance[0].arn, null)
+}
+
+output "instance_iam_role_unique_id" {
+  description = "Stable and unique string identifying the IAM role"
+  value       = try(aws_iam_role.instance[0].unique_id, null)
+}
 
 ################################################################################
 # VPC Connector
@@ -20,20 +91,6 @@ output "vpc_connector_status" {
 output "vpc_connector_revision" {
   description = "The revision of VPC connector. It's unique among all the active connectors (\"Status\": \"ACTIVE\") that share the same Name"
   value       = try(aws_apprunner_vpc_connector.this[0].vpc_connector_revision, null)
-}
-
-################################################################################
-# Connection
-################################################################################
-
-output "connection_arn" {
-  description = "The Amazon Resource Name (ARN) of the connection"
-  value       = try(aws_apprunner_connection.this[0].arn, null)
-}
-
-output "connection_status" {
-  description = "The current state of the App Runner connection. When the state is `AVAILABLE`, you can use the connection to create an aws_apprunner_service resource"
-  value       = try(aws_apprunner_connection.this[0].status, null)
 }
 
 ################################################################################
@@ -99,6 +156,6 @@ output "observability_configuration_latest" {
 }
 
 output "observability_configuration_status" {
-  description = "The current state of the observability configuration. An INACTIVE configuration revision has been deleted and can't be used. It is permanently removed some time after deletion"
+  description = "The current state of the observability configuration. An `INACTIVE` configuration revision has been deleted and can't be used. It is permanently removed some time after deletion"
   value       = try(aws_apprunner_observability_configuration.this[0].status, null)
 }

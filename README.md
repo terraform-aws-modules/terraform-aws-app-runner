@@ -46,39 +46,56 @@ No modules.
 | Name | Type |
 |------|------|
 | [aws_apprunner_auto_scaling_configuration_version.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apprunner_auto_scaling_configuration_version) | resource |
-| [aws_apprunner_connection.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apprunner_connection) | resource |
 | [aws_apprunner_custom_domain_association.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apprunner_custom_domain_association) | resource |
 | [aws_apprunner_observability_configuration.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apprunner_observability_configuration) | resource |
 | [aws_apprunner_service.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apprunner_service) | resource |
 | [aws_apprunner_vpc_connector.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apprunner_vpc_connector) | resource |
-| [aws_route53_record.cname](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
-| [aws_route53_record.validation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_cloudwatch_log_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_iam_role.access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_policy_document.access_assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.instance_assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_access_iam_role_description"></a> [access\_iam\_role\_description](#input\_access\_iam\_role\_description) | Description of the role | `string` | `null` | no |
+| <a name="input_access_iam_role_name"></a> [access\_iam\_role\_name](#input\_access\_iam\_role\_name) | Name to use on IAM role created | `string` | `null` | no |
+| <a name="input_access_iam_role_path"></a> [access\_iam\_role\_path](#input\_access\_iam\_role\_path) | IAM role path | `string` | `null` | no |
+| <a name="input_access_iam_role_permissions_boundary"></a> [access\_iam\_role\_permissions\_boundary](#input\_access\_iam\_role\_permissions\_boundary) | ARN of the policy that is used to set the permissions boundary for the IAM role | `string` | `null` | no |
+| <a name="input_access_iam_role_policies"></a> [access\_iam\_role\_policies](#input\_access\_iam\_role\_policies) | IAM policies to attach to the IAM role | `map(string)` | `{}` | no |
+| <a name="input_access_iam_role_use_name_prefix"></a> [access\_iam\_role\_use\_name\_prefix](#input\_access\_iam\_role\_use\_name\_prefix) | Determines whether the IAM role name (`iam_role_name`) is used as a prefix | `bool` | `true` | no |
 | <a name="input_auto_deployments_enabled"></a> [auto\_deployments\_enabled](#input\_auto\_deployments\_enabled) | Whether auto deployments are enabled for the service | `bool` | `false` | no |
-| <a name="input_autoscaling_configuration_arn"></a> [autoscaling\_configuration\_arn](#input\_autoscaling\_configuration\_arn) | The ARN of an existing Auto Scaling Configuration | `string` | `null` | no |
 | <a name="input_autoscaling_max_concurrency"></a> [autoscaling\_max\_concurrency](#input\_autoscaling\_max\_concurrency) | The maximal number of concurrent requests that you want an instance to process. When the number of concurrent requests goes over this limit, App Runner scales up your service | `number` | `null` | no |
 | <a name="input_autoscaling_max_size"></a> [autoscaling\_max\_size](#input\_autoscaling\_max\_size) | The maximal number of instances that App Runner provisions for your service | `number` | `1` | no |
 | <a name="input_autoscaling_min_size"></a> [autoscaling\_min\_size](#input\_autoscaling\_min\_size) | The minimal number of instances that App Runner provisions for your service | `number` | `1` | no |
 | <a name="input_autoscaling_name"></a> [autoscaling\_name](#input\_autoscaling\_name) | The name of the auto scaling configuration | `string` | `null` | no |
-| <a name="input_connection_name"></a> [connection\_name](#input\_connection\_name) | The name of the connection | `string` | `""` | no |
-| <a name="input_connection_provider_type"></a> [connection\_provider\_type](#input\_connection\_provider\_type) | The source repository provider. Valid values: `GITHUB` | `string` | `"GITHUB"` | no |
+| <a name="input_cloudwatch_log_group_kms_key_id"></a> [cloudwatch\_log\_group\_kms\_key\_id](#input\_cloudwatch\_log\_group\_kms\_key\_id) | If a KMS Key ARN is set, this key will be used to encrypt the corresponding log group. Please be sure that the KMS Key has an appropriate key policy (https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html) | `string` | `null` | no |
+| <a name="input_cloudwatch_log_group_retention_in_days"></a> [cloudwatch\_log\_group\_retention\_in\_days](#input\_cloudwatch\_log\_group\_retention\_in\_days) | Number of days to retain log events. Default retention - 7 days | `number` | `7` | no |
 | <a name="input_create"></a> [create](#input\_create) | Determines whether resources will be created (affects all resources) | `bool` | `true` | no |
+| <a name="input_create_access_iam_role"></a> [create\_access\_iam\_role](#input\_create\_access\_iam\_role) | Determines whether an IAM role is created or to use an existing IAM role | `bool` | `true` | no |
 | <a name="input_create_autoscaling_configuration"></a> [create\_autoscaling\_configuration](#input\_create\_autoscaling\_configuration) | Determines whether an Auto Scaling Configuration will be created | `bool` | `true` | no |
-| <a name="input_create_connection"></a> [create\_connection](#input\_create\_connection) | Determines whether a connection will be created | `bool` | `true` | no |
+| <a name="input_create_cloudwatch_log_group"></a> [create\_cloudwatch\_log\_group](#input\_create\_cloudwatch\_log\_group) | Determines whether a log group is created by this module for the cluster logs. If not, AWS will automatically create one | `bool` | `true` | no |
 | <a name="input_create_custom_domain_association"></a> [create\_custom\_domain\_association](#input\_create\_custom\_domain\_association) | Determines whether a Custom Domain Association will be created | `bool` | `true` | no |
+| <a name="input_create_instance_iam_role"></a> [create\_instance\_iam\_role](#input\_create\_instance\_iam\_role) | Determines whether an IAM role is created or to use an existing IAM role | `bool` | `true` | no |
 | <a name="input_create_vpc_connector"></a> [create\_vpc\_connector](#input\_create\_vpc\_connector) | Determines whether a VPC Connector will be created | `bool` | `true` | no |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | The custom domain endpoint to association. Specify a base domain e.g., `example.com` or a subdomain e.g., `subdomain.example.com` | `string` | `""` | no |
 | <a name="input_enable_observability_configuration"></a> [enable\_observability\_configuration](#input\_enable\_observability\_configuration) | Determines whether an Observability Configuration will be created | `bool` | `true` | no |
 | <a name="input_enable_www_subdomain"></a> [enable\_www\_subdomain](#input\_enable\_www\_subdomain) | Whether to associate the subdomain with the App Runner service in addition to the base domain. Defaults to `true` | `bool` | `null` | no |
 | <a name="input_encryption_configuration"></a> [encryption\_configuration](#input\_encryption\_configuration) | The encryption configuration for the service | `any` | `{}` | no |
 | <a name="input_health_check_configuration"></a> [health\_check\_configuration](#input\_health\_check\_configuration) | The health check configuration for the service | `any` | `{}` | no |
-| <a name="input_hosted_zone_id"></a> [hosted\_zone\_id](#input\_hosted\_zone\_id) | The ID of the Route53 hosted zone that contains the domain for the `domain_name` | `string` | `""` | no |
 | <a name="input_instance_configuration"></a> [instance\_configuration](#input\_instance\_configuration) | The instance configuration for the service | `any` | `{}` | no |
-| <a name="input_network_configuration"></a> [network\_configuration](#input\_network\_configuration) | The network configuration for the service | `any` | `{}` | no |
+| <a name="input_instance_iam_role_description"></a> [instance\_iam\_role\_description](#input\_instance\_iam\_role\_description) | Description of the role | `string` | `null` | no |
+| <a name="input_instance_iam_role_name"></a> [instance\_iam\_role\_name](#input\_instance\_iam\_role\_name) | Name to use on IAM role created | `string` | `null` | no |
+| <a name="input_instance_iam_role_path"></a> [instance\_iam\_role\_path](#input\_instance\_iam\_role\_path) | IAM role path | `string` | `null` | no |
+| <a name="input_instance_iam_role_permissions_boundary"></a> [instance\_iam\_role\_permissions\_boundary](#input\_instance\_iam\_role\_permissions\_boundary) | ARN of the policy that is used to set the permissions boundary for the IAM role | `string` | `null` | no |
+| <a name="input_instance_iam_role_policies"></a> [instance\_iam\_role\_policies](#input\_instance\_iam\_role\_policies) | IAM policies to attach to the IAM role | `map(string)` | `{}` | no |
+| <a name="input_instance_iam_role_use_name_prefix"></a> [instance\_iam\_role\_use\_name\_prefix](#input\_instance\_iam\_role\_use\_name\_prefix) | Determines whether the IAM role name (`iam_role_name`) is used as a prefix | `bool` | `true` | no |
+| <a name="input_network_configuration"></a> [network\_configuration](#input\_network\_configuration) | The network configuration for the service | `any` | <pre>{<br>  "egress_configuration": {<br>    "egress_type": "VPC"<br>  }<br>}</pre> | no |
 | <a name="input_observability_configuration_name"></a> [observability\_configuration\_name](#input\_observability\_configuration\_name) | The name of the Observability Configuration | `string` | `""` | no |
 | <a name="input_observability_trace_configuration"></a> [observability\_trace\_configuration](#input\_observability\_trace\_configuration) | The name of the Trace Configuration | `any` | `{}` | no |
 | <a name="input_service_name"></a> [service\_name](#input\_service\_name) | The name of the service | `string` | `""` | no |
@@ -92,19 +109,29 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_access_iam_role_arn"></a> [access\_iam\_role\_arn](#output\_access\_iam\_role\_arn) | The Amazon Resource Name (ARN) specifying the IAM role |
+| <a name="output_access_iam_role_name"></a> [access\_iam\_role\_name](#output\_access\_iam\_role\_name) | The name of the IAM role |
+| <a name="output_access_iam_role_unique_id"></a> [access\_iam\_role\_unique\_id](#output\_access\_iam\_role\_unique\_id) | Stable and unique string identifying the IAM role |
 | <a name="output_autoscaling_configuration_arn"></a> [autoscaling\_configuration\_arn](#output\_autoscaling\_configuration\_arn) | ARN of this auto scaling configuration version |
 | <a name="output_autoscaling_configuration_latest"></a> [autoscaling\_configuration\_latest](#output\_autoscaling\_configuration\_latest) | Whether the auto scaling configuration has the highest `auto_scaling_configuration_revision` among all configurations that share the same `auto_scaling_configuration_name` |
 | <a name="output_autoscaling_configuration_revision"></a> [autoscaling\_configuration\_revision](#output\_autoscaling\_configuration\_revision) | The revision of this auto scaling configuration |
 | <a name="output_autoscaling_configuration_status"></a> [autoscaling\_configuration\_status](#output\_autoscaling\_configuration\_status) | The current state of the auto scaling configuration. An INACTIVE configuration revision has been deleted and can't be used. It is permanently removed some time after deletion |
-| <a name="output_connection_arn"></a> [connection\_arn](#output\_connection\_arn) | The Amazon Resource Name (ARN) of the connection |
-| <a name="output_connection_status"></a> [connection\_status](#output\_connection\_status) | The current state of the App Runner connection. When the state is `AVAILABLE`, you can use the connection to create an aws\_apprunner\_service resource |
+| <a name="output_cloudwatch_log_group_arn"></a> [cloudwatch\_log\_group\_arn](#output\_cloudwatch\_log\_group\_arn) | Arn of cloudwatch log group created |
+| <a name="output_cloudwatch_log_group_name"></a> [cloudwatch\_log\_group\_name](#output\_cloudwatch\_log\_group\_name) | Name of cloudwatch log group created |
 | <a name="output_custom_domain_association_certificate_validation_records"></a> [custom\_domain\_association\_certificate\_validation\_records](#output\_custom\_domain\_association\_certificate\_validation\_records) | A set of certificate CNAME records used for this domain name |
 | <a name="output_custom_domain_association_dns_target"></a> [custom\_domain\_association\_dns\_target](#output\_custom\_domain\_association\_dns\_target) | The App Runner subdomain of the App Runner service. The custom domain name is mapped to this target name. Attribute only available if resource created (not imported) with Terraform |
 | <a name="output_custom_domain_association_id"></a> [custom\_domain\_association\_id](#output\_custom\_domain\_association\_id) | The `domain_name` and `service_arn` separated by a comma (`,`) |
+| <a name="output_instance_iam_role_arn"></a> [instance\_iam\_role\_arn](#output\_instance\_iam\_role\_arn) | The Amazon Resource Name (ARN) specifying the IAM role |
+| <a name="output_instance_iam_role_name"></a> [instance\_iam\_role\_name](#output\_instance\_iam\_role\_name) | The name of the IAM role |
+| <a name="output_instance_iam_role_unique_id"></a> [instance\_iam\_role\_unique\_id](#output\_instance\_iam\_role\_unique\_id) | Stable and unique string identifying the IAM role |
 | <a name="output_observability_configuration_arn"></a> [observability\_configuration\_arn](#output\_observability\_configuration\_arn) | ARN of this observability configuration |
 | <a name="output_observability_configuration_latest"></a> [observability\_configuration\_latest](#output\_observability\_configuration\_latest) | Whether the observability configuration has the highest `observability_configuration_revision` among all configurations that share the same `observability_configuration_name` |
 | <a name="output_observability_configuration_revision"></a> [observability\_configuration\_revision](#output\_observability\_configuration\_revision) | The revision of the observability configuration |
-| <a name="output_observability_configuration_status"></a> [observability\_configuration\_status](#output\_observability\_configuration\_status) | The current state of the observability configuration. An INACTIVE configuration revision has been deleted and can't be used. It is permanently removed some time after deletion |
+| <a name="output_observability_configuration_status"></a> [observability\_configuration\_status](#output\_observability\_configuration\_status) | The current state of the observability configuration. An `INACTIVE` configuration revision has been deleted and can't be used. It is permanently removed some time after deletion |
+| <a name="output_service_arn"></a> [service\_arn](#output\_service\_arn) | The Amazon Resource Name (ARN) of the service |
+| <a name="output_service_id"></a> [service\_id](#output\_service\_id) | An alphanumeric ID that App Runner generated for this service. Unique within the AWS Region |
+| <a name="output_service_status"></a> [service\_status](#output\_service\_status) | The current state of the App Runner service |
+| <a name="output_service_url"></a> [service\_url](#output\_service\_url) | A subdomain URL that App Runner generated for this service. You can use this URL to access your service web application |
 | <a name="output_vpc_connector_arn"></a> [vpc\_connector\_arn](#output\_vpc\_connector\_arn) | The Amazon Resource Name (ARN) of VPC connector |
 | <a name="output_vpc_connector_revision"></a> [vpc\_connector\_revision](#output\_vpc\_connector\_revision) | The revision of VPC connector. It's unique among all the active connectors ("Status": "ACTIVE") that share the same Name |
 | <a name="output_vpc_connector_status"></a> [vpc\_connector\_status](#output\_vpc\_connector\_status) | The current state of the VPC connector. If the status of a connector revision is INACTIVE, it was deleted and can't be used. Inactive connector revisions are permanently removed some time after they are deleted |

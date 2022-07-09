@@ -41,7 +41,11 @@ variable "instance_configuration" {
 variable "network_configuration" {
   description = "The network configuration for the service"
   type        = any
-  default     = {}
+  default = {
+    egress_configuration = {
+      egress_type = "VPC"
+    }
+  }
 }
 
 variable "source_configuration" {
@@ -54,6 +58,120 @@ variable "auto_deployments_enabled" {
   description = "Whether auto deployments are enabled for the service"
   type        = bool
   default     = false
+}
+
+################################################################################
+# CloudWatch Log Group
+################################################################################
+
+variable "create_cloudwatch_log_group" {
+  description = "Determines whether a log group is created by this module for the cluster logs. If not, AWS will automatically create one"
+  type        = bool
+  default     = true
+}
+
+variable "cloudwatch_log_group_retention_in_days" {
+  description = "Number of days to retain log events. Default retention - 7 days"
+  type        = number
+  default     = 7
+}
+
+variable "cloudwatch_log_group_kms_key_id" {
+  description = "If a KMS Key ARN is set, this key will be used to encrypt the corresponding log group. Please be sure that the KMS Key has an appropriate key policy (https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html)"
+  type        = string
+  default     = null
+}
+
+################################################################################
+# IAM Role - Access
+################################################################################
+
+variable "create_access_iam_role" {
+  description = "Determines whether an IAM role is created or to use an existing IAM role"
+  type        = bool
+  default     = true
+}
+
+variable "access_iam_role_name" {
+  description = "Name to use on IAM role created"
+  type        = string
+  default     = null
+}
+
+variable "access_iam_role_use_name_prefix" {
+  description = "Determines whether the IAM role name (`iam_role_name`) is used as a prefix"
+  type        = bool
+  default     = true
+}
+
+variable "access_iam_role_path" {
+  description = "IAM role path"
+  type        = string
+  default     = null
+}
+
+variable "access_iam_role_description" {
+  description = "Description of the role"
+  type        = string
+  default     = null
+}
+
+variable "access_iam_role_permissions_boundary" {
+  description = "ARN of the policy that is used to set the permissions boundary for the IAM role"
+  type        = string
+  default     = null
+}
+
+variable "access_iam_role_policies" {
+  description = "IAM policies to attach to the IAM role"
+  type        = map(string)
+  default     = {}
+}
+
+################################################################################
+# IAM Role - Instance
+################################################################################
+
+variable "create_instance_iam_role" {
+  description = "Determines whether an IAM role is created or to use an existing IAM role"
+  type        = bool
+  default     = true
+}
+
+variable "instance_iam_role_name" {
+  description = "Name to use on IAM role created"
+  type        = string
+  default     = null
+}
+
+variable "instance_iam_role_use_name_prefix" {
+  description = "Determines whether the IAM role name (`iam_role_name`) is used as a prefix"
+  type        = bool
+  default     = true
+}
+
+variable "instance_iam_role_path" {
+  description = "IAM role path"
+  type        = string
+  default     = null
+}
+
+variable "instance_iam_role_description" {
+  description = "Description of the role"
+  type        = string
+  default     = null
+}
+
+variable "instance_iam_role_permissions_boundary" {
+  description = "ARN of the policy that is used to set the permissions boundary for the IAM role"
+  type        = string
+  default     = null
+}
+
+variable "instance_iam_role_policies" {
+  description = "IAM policies to attach to the IAM role"
+  type        = map(string)
+  default     = {}
 }
 
 ################################################################################
@@ -85,28 +203,6 @@ variable "vpc_connector_security_groups" {
 }
 
 ################################################################################
-# Connection
-################################################################################
-
-variable "create_connection" {
-  description = "Determines whether a connection will be created"
-  type        = bool
-  default     = true
-}
-
-variable "connection_name" {
-  description = "The name of the connection"
-  type        = string
-  default     = ""
-}
-
-variable "connection_provider_type" {
-  description = "The source repository provider. Valid values: `GITHUB`"
-  type        = string
-  default     = "GITHUB"
-}
-
-################################################################################
 # Autoscaling
 ################################################################################
 
@@ -114,12 +210,6 @@ variable "create_autoscaling_configuration" {
   description = "Determines whether an Auto Scaling Configuration will be created"
   type        = bool
   default     = true
-}
-
-variable "autoscaling_configuration_arn" {
-  description = "The ARN of an existing Auto Scaling Configuration"
-  type        = string
-  default     = null
 }
 
 variable "autoscaling_name" {
@@ -168,11 +258,11 @@ variable "enable_www_subdomain" {
   default     = null
 }
 
-variable "hosted_zone_id" {
-  description = "The ID of the Route53 hosted zone that contains the domain for the `domain_name`"
-  type        = string
-  default     = ""
-}
+# variable "hosted_zone_id" {
+#   description = "The ID of the Route53 hosted zone that contains the domain for the `domain_name`"
+#   type        = string
+#   default     = ""
+# }
 
 ################################################################################
 # Observability Configuration
