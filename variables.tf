@@ -41,45 +41,13 @@ variable "instance_configuration" {
 variable "network_configuration" {
   description = "The network configuration for the service"
   type        = any
-  default = {
-    egress_configuration = {
-      egress_type = "VPC"
-    }
-  }
+  default     = {}
 }
 
 variable "source_configuration" {
   description = "The source configuration for the service"
   type        = any
   default     = {}
-}
-
-variable "auto_deployments_enabled" {
-  description = "Whether auto deployments are enabled for the service"
-  type        = bool
-  default     = false
-}
-
-################################################################################
-# CloudWatch Log Group
-################################################################################
-
-variable "create_cloudwatch_log_group" {
-  description = "Determines whether a log group is created by this module for the cluster logs. If not, AWS will automatically create one"
-  type        = bool
-  default     = true
-}
-
-variable "cloudwatch_log_group_retention_in_days" {
-  description = "Number of days to retain log events. Default retention - 7 days"
-  type        = number
-  default     = 7
-}
-
-variable "cloudwatch_log_group_kms_key_id" {
-  description = "If a KMS Key ARN is set, this key will be used to encrypt the corresponding log group. Please be sure that the KMS Key has an appropriate key policy (https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html)"
-  type        = string
-  default     = null
 }
 
 ################################################################################
@@ -89,7 +57,7 @@ variable "cloudwatch_log_group_kms_key_id" {
 variable "create_access_iam_role" {
   description = "Determines whether an IAM role is created or to use an existing IAM role"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "access_iam_role_name" {
@@ -181,7 +149,7 @@ variable "instance_iam_role_policies" {
 variable "create_vpc_connector" {
   description = "Determines whether a VPC Connector will be created"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "vpc_connector_name" {
@@ -243,7 +211,7 @@ variable "autoscaling_min_size" {
 variable "create_custom_domain_association" {
   description = "Determines whether a Custom Domain Association will be created"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "domain_name" {
@@ -271,7 +239,7 @@ variable "enable_www_subdomain" {
 variable "enable_observability_configuration" {
   description = "Determines whether an Observability Configuration will be created"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "observability_configuration_name" {

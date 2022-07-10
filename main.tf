@@ -49,7 +49,7 @@ resource "aws_apprunner_service" "this" {
 
         content {
           egress_type       = try(egress_configuration.value.egress_type, null)
-          vpc_connector_arn = var.create_vpc_connector ? aws_apprunner_vpc_connector.this[0].arn : try(egress_configuration.value.egress_type, null)
+          vpc_connector_arn = var.create_vpc_connector ? aws_apprunner_vpc_connector.this[0].arn : try(egress_configuration.value.vpc_connector_arn, null)
         }
       }
     }
@@ -79,7 +79,7 @@ resource "aws_apprunner_service" "this" {
         }
       }
 
-      auto_deployments_enabled = try(var.auto_deployments_enabled, null)
+      auto_deployments_enabled = try(source_configuration.value.auto_deployments_enabled, null)
 
       dynamic "code_repository" {
         for_each = try([source_configuration.value.code_repository], [])
@@ -138,20 +138,6 @@ resource "aws_apprunner_service" "this" {
       }
     }
   }
-
-  tags = var.tags
-}
-
-################################################################################
-# IAM Role - Access
-################################################################################
-
-resource "aws_cloudwatch_log_group" "this" {
-  count = var.create && var.create_cloudwatch_log_group ? 1 : 0
-
-  name              = "/aws/apprunner/${aws_apprunner_service.this[0].service_name}/${aws_apprunner_service.this[0].service_id}/service"
-  retention_in_days = var.cloudwatch_log_group_retention_in_days
-  kms_key_id        = var.cloudwatch_log_group_kms_key_id
 
   tags = var.tags
 }

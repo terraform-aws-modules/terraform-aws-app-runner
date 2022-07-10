@@ -4,7 +4,7 @@ provider "aws" {
 
 locals {
   region = "us-east-1"
-  name   = "app-runner-ex-${replace(basename(path.cwd), "_", "-")}"
+  name   = "ex-${replace(basename(path.cwd), "_", "-")}"
 
   tags = {
     Example    = local.name
@@ -16,41 +16,53 @@ locals {
 # App Runner Module
 ################################################################################
 
-module "app_runner" {
+module "app_runner_code_base" {
   source = "../.."
 
-  create = false
-
-  service_name = local.name
-
-  # TODO - enable
-  create_custom_domain_association = false
-
-  vpc_connector_subnets         = module.vpc.private_subnets
-  vpc_connector_security_groups = [module.security_group.security_group_id]
-
-  # Using GitHub connection so access role arn is not used
-  create_access_iam_role = false
+  service_name = "${local.name}-code-base2"
 
   source_configuration = {
     authentication_configuration = {
       connection_arn = aws_apprunner_connection.this.arn
     }
+    auto_deployments_enabled = false
     code_repository = {
       code_configuration = {
-        code_configuration_values = {
-          build_command = "pip install -r requirements.txt"
-          port          = 8000
-          runtime       = "PYTHON_3"
-          start_command = "python server.py"
-        }
-        configuration_source = "API"
+        configuration_source = "REPOSITORY"
       }
-      repository_url = "https://github.com/clowdhaus/terraform-aws-app-runner-examples"
+      repository_url = "https://github.com/aws-containers/hello-app-runner"
       source_code_version = {
         type  = "BRANCH"
         value = "main"
       }
+    }
+  }
+
+  tags = local.tags
+}
+
+
+module "app_runner_image_base" {
+  source = "../.."
+
+  service_name = "${local.name}-image-base2"
+
+  create_access_iam_role = true
+  access_iam_role_policies = {
+    "AWSAppRunnerServicePolicyForECRAccess" = "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
+  }
+
+  source_configuration = {
+    # authentication_configuration = {
+    #   connection_arn = aws_apprunner_connection.this.arn
+    # }
+    auto_deployments_enabled = false
+    image_repository = {
+      image_configuration = {
+        port = 8000
+      }
+      image_identifier      = "public.ecr.aws/aws-containers/hello-app-runner:latest"
+      image_repository_type = "ECR_PUBLIC"
     }
   }
 
