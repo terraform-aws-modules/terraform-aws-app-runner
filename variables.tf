@@ -14,6 +14,12 @@ variable "tags" {
 # Service
 ################################################################################
 
+variable "create_service" {
+  description = "Determines whether the service will be created"
+  type        = bool
+  default     = true
+}
+
 variable "service_name" {
   description = "The name of the service"
   type        = string
@@ -40,6 +46,12 @@ variable "instance_configuration" {
 
 variable "network_configuration" {
   description = "The network configuration for the service"
+  type        = any
+  default     = {}
+}
+
+variable "observability_configuration" {
+  description = "The observability configuration for the service"
   type        = any
   default     = {}
 }
@@ -86,6 +98,12 @@ variable "access_iam_role_description" {
 
 variable "access_iam_role_permissions_boundary" {
   description = "ARN of the policy that is used to set the permissions boundary for the IAM role"
+  type        = string
+  default     = null
+}
+
+variable "private_ecr_arn" {
+  description = "The ARN of the private ECR repository that contains the service image to launch"
   type        = string
   default     = null
 }
@@ -171,6 +189,40 @@ variable "vpc_connector_security_groups" {
 }
 
 ################################################################################
+# VPC Connector - Security Group
+################################################################################
+
+variable "create_security_group" {
+  description = "Determines if a security group is created for the VPC connector"
+  type        = bool
+  default     = true
+}
+
+variable "vpc_id" {
+  description = "ID of the VPC where the security will be provisioned"
+  type        = string
+  default     = null
+}
+
+variable "security_group_use_name_prefix" {
+  description = "Determines whether the security group name (`security_group_name`) is used as a prefix"
+  type        = bool
+  default     = true
+}
+
+variable "security_group_description" {
+  description = "Description for the security group created"
+  type        = string
+  default     = null
+}
+
+variable "security_group_rules" {
+  description = "List of security group rules to add to the security group created"
+  type        = any
+  default     = {}
+}
+
+################################################################################
 # Autoscaling
 ################################################################################
 
@@ -236,7 +288,7 @@ variable "enable_www_subdomain" {
 # Observability Configuration
 ################################################################################
 
-variable "enable_observability_configuration" {
+variable "create_observability_configuration" {
   description = "Determines whether an Observability Configuration will be created"
   type        = bool
   default     = false
@@ -249,7 +301,7 @@ variable "observability_configuration_name" {
 }
 
 variable "observability_trace_configuration" {
-  description = "The name of the Trace Configuration"
+  description = "The Observability Configuration trace coniguration"
   type        = any
   default     = {}
 }

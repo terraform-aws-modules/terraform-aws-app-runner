@@ -5,7 +5,7 @@ data "aws_partition" "current" {}
 ################################################################################
 
 resource "aws_apprunner_service" "this" {
-  count = var.create ? 1 : 0
+  count = var.create && var.create_service ? 1 : 0
 
   auto_scaling_configuration_arn = try(aws_apprunner_auto_scaling_configuration_version.this[0].arn, null)
 
@@ -56,11 +56,11 @@ resource "aws_apprunner_service" "this" {
   }
 
   dynamic "observability_configuration" {
-    for_each = var.enable_observability_configuration ? [1] : []
+    for_each = length(var.observability_configuration) > 0 ? [var.observability_configuration] : []
 
     content {
-      observability_configuration_arn = aws_apprunner_observability_configuration.this[0].arn
-      observability_enabled           = var.enable_observability_configuration
+      observability_configuration_arn = var.create_observability_configuration ? aws_apprunner_observability_configuration.this[0].arn : try(observability_configuration.value.observability_configuration_arn, null)
+      observability_enabled           = try(observability_configuration.value.observability_enabled, null)
     }
   }
 
@@ -147,11 +147,13 @@ resource "aws_apprunner_service" "this" {
 ################################################################################
 
 locals {
+  create_access_iam_role = var.create && var.create_service && var.create_access_iam_role
+
   access_iam_role_name = try(coalesce(var.access_iam_role_name, "${var.service_name}-access"), "")
 }
 
 data "aws_iam_policy_document" "access_assume_role" {
-  count = var.create && var.create_access_iam_role ? 1 : 0
+  count = local.create_access_iam_role ? 1 : 0
 
   statement {
     sid     = "AccessAssumeRole"
@@ -165,7 +167,7 @@ data "aws_iam_policy_document" "access_assume_role" {
 }
 
 resource "aws_iam_role" "access" {
-  count = var.create && var.create_access_iam_role ? 1 : 0
+  count = local.create_access_iam_role ? 1 : 0
 
   name        = var.access_iam_role_use_name_prefix ? null : local.access_iam_role_name
   name_prefix = var.access_iam_role_use_name_prefix ? "${local.access_iam_role_name}-" : null
@@ -179,8 +181,57 @@ resource "aws_iam_role" "access" {
   tags = var.tags
 }
 
+data "aws_iam_policy_document" "access" {
+  count = local.create_access_iam_role && var.private_ecr_arn != null ? 1 : 0
+
+  dynamic "statement" {
+    for_each = var.private_ecr_arn != null ? [1] : []
+
+    content {
+      sid = "ReadPrivateEcr"
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:DescribeImages",
+        "ecr:GetDownloadUrlForLayer",
+      ]
+      resources = [var.private_ecr_arn]
+    }
+  }
+
+  dynamic "statement" {
+    for_each = var.private_ecr_arn != null ? [1] : []
+
+    content {
+      sid = "AuthPrivateEcr"
+      actions = [
+        "ecr:DescribeImages",
+        "ecr:GetAuthorizationToken",
+      ]
+      resources = ["*"]
+    }
+  }
+}
+
+resource "aws_iam_policy" "access" {
+  count = local.create_access_iam_role && var.private_ecr_arn != null ? 1 : 0
+
+  name        = var.access_iam_role_use_name_prefix ? null : local.access_iam_role_name
+  name_prefix = var.access_iam_role_use_name_prefix ? "${local.access_iam_role_name}-" : null
+  path        = var.access_iam_role_path
+  description = var.access_iam_role_description
+
+  policy = data.aws_iam_policy_document.access[0].json
+}
+
 resource "aws_iam_role_policy_attachment" "access" {
-  for_each = { for k, v in var.access_iam_role_policies : k => v if var.create && var.create_access_iam_role }
+  count = local.create_access_iam_role && var.private_ecr_arn != null ? 1 : 0
+
+  policy_arn = aws_iam_policy.access[0].arn
+  role       = aws_iam_role.access[0].name
+}
+
+resource "aws_iam_role_policy_attachment" "access_additional" {
+  for_each = { for k, v in var.access_iam_role_policies : k => v if local.create_access_iam_role }
 
   policy_arn = each.value
   role       = aws_iam_role.access[0].name
@@ -191,6 +242,8 @@ resource "aws_iam_role_policy_attachment" "access" {
 ################################################################################
 
 locals {
+  create_instance_iam_role = var.create && var.create_service && var.create_instance_iam_role
+
   instance_iam_role_name = try(coalesce(var.instance_iam_role_name, "${var.service_name}-instance"), "")
 }
 
@@ -209,7 +262,7 @@ data "aws_iam_policy_document" "instance_assume_role" {
 }
 
 resource "aws_iam_role" "instance" {
-  count = var.create && var.create_instance_iam_role ? 1 : 0
+  count = local.create_instance_iam_role ? 1 : 0
 
   name        = var.instance_iam_role_use_name_prefix ? null : local.instance_iam_role_name
   name_prefix = var.instance_iam_role_use_name_prefix ? "${local.instance_iam_role_name}-" : null
@@ -223,8 +276,15 @@ resource "aws_iam_role" "instance" {
   tags = var.tags
 }
 
+resource "aws_iam_role_policy_attachment" "instance_xray" {
+  count = local.create_instance_iam_role && try(var.observability_trace_configuration.vendor, null) == "AWSXRAY" ? 1 : 0
+
+  policy_arn = "arn:${data.aws_partition.current.id}:iam::aws:policy/AWSXRayDaemonWriteAccess"
+  role       = aws_iam_role.instance[0].name
+}
+
 resource "aws_iam_role_policy_attachment" "instance" {
-  for_each = { for k, v in var.instance_iam_role_policies : k => v if var.create && var.create_instance_iam_role }
+  for_each = { for k, v in var.instance_iam_role_policies : k => v if local.create_instance_iam_role }
 
   policy_arn = each.value
   role       = aws_iam_role.instance[0].name
@@ -234,14 +294,61 @@ resource "aws_iam_role_policy_attachment" "instance" {
 # VPC Connector
 ################################################################################
 
-resource "aws_apprunner_vpc_connector" "this" {
-  count = var.create && var.create_vpc_connector ? 1 : 0
+locals {
+  create_vpc_connector = var.create && var.create_vpc_connector
 
   vpc_connector_name = try(coalesce(var.vpc_connector_name, var.service_name), "")
+}
+
+resource "aws_apprunner_vpc_connector" "this" {
+  count = local.create_vpc_connector ? 1 : 0
+
+  vpc_connector_name = local.vpc_connector_name
   subnets            = var.vpc_connector_subnets
-  security_groups    = var.vpc_connector_security_groups
+  security_groups    = compact(concat(var.vpc_connector_security_groups, try(aws_security_group.this[0].id, [])))
 
   tags = var.tags
+}
+
+################################################################################
+# VPC Connector - Security Group
+################################################################################
+
+resource "aws_security_group" "this" {
+  count = var.create_security_group && local.create_vpc_connector ? 1 : 0
+
+  name        = var.security_group_use_name_prefix ? null : local.vpc_connector_name
+  name_prefix = var.security_group_use_name_prefix ? "${local.vpc_connector_name}-" : null
+  description = var.security_group_description
+  vpc_id      = var.vpc_id
+
+  tags = merge(
+    var.tags,
+    { "Name" = local.vpc_connector_name },
+  )
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_security_group_rule" "this" {
+  for_each = { for k, v in var.security_group_rules : k => v if var.create_security_group && local.create_vpc_connector }
+
+  # Required
+  security_group_id = aws_security_group.this[0].id
+  protocol          = each.value.protocol
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  type              = "egress"
+
+  # Optional
+  description              = try(each.value.description, null)
+  cidr_blocks              = try(each.value.cidr_blocks, null)
+  ipv6_cidr_blocks         = try(each.value.ipv6_cidr_blocks, null)
+  prefix_list_ids          = try(each.value.prefix_list_ids, [])
+  self                     = try(each.value.self, null)
+  source_security_group_id = try(each.value.source_security_group_id, null)
 }
 
 ################################################################################
@@ -264,8 +371,12 @@ resource "aws_apprunner_auto_scaling_configuration_version" "this" {
 # Custom Domain Association
 ################################################################################
 
+locals {
+  create_custom_domain_association = var.create && var.create_custom_domain_association
+}
+
 resource "aws_apprunner_custom_domain_association" "this" {
-  count = var.create && var.create_custom_domain_association ? 1 : 0
+  count = local.create_custom_domain_association ? 1 : 0
 
   domain_name          = var.domain_name
   enable_www_subdomain = var.enable_www_subdomain
@@ -278,7 +389,7 @@ resource "aws_apprunner_custom_domain_association" "this" {
 #       name   = dvo.name
 #       record = dvo.value
 #       type   = dvo.type
-#     } if var.create && var.create_custom_domain_association
+#     } if local.create_custom_domain_association
 #   }
 
 #   allow_overwrite = true
@@ -290,7 +401,7 @@ resource "aws_apprunner_custom_domain_association" "this" {
 # }
 
 # resource "aws_route53_record" "cname" {
-#   count = var.create && var.create_custom_domain_association ? 1 : 0
+#   count = local.create_custom_domain_association ? 1 : 0
 
 #   allow_overwrite = true
 #   name            = var.domain_name
@@ -305,7 +416,7 @@ resource "aws_apprunner_custom_domain_association" "this" {
 ################################################################################
 
 resource "aws_apprunner_observability_configuration" "this" {
-  count = var.create && var.enable_observability_configuration ? 1 : 0
+  count = var.create && var.create_observability_configuration ? 1 : 0
 
   observability_configuration_name = try(coalesce(var.observability_configuration_name, var.service_name), "")
 
