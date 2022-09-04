@@ -7,7 +7,7 @@ data "aws_partition" "current" {}
 resource "aws_apprunner_service" "this" {
   count = var.create && var.create_service ? 1 : 0
 
-  auto_scaling_configuration_arn = try(aws_apprunner_auto_scaling_configuration_version.this[0].arn, null)
+  auto_scaling_configuration_arn = var.auto_scaling_configuration_arn
 
   dynamic "encryption_configuration" {
     for_each = length(var.encryption_configuration) > 0 ? [var.encryption_configuration] : []
@@ -49,7 +49,7 @@ resource "aws_apprunner_service" "this" {
 
         content {
           egress_type       = try(egress_configuration.value.egress_type, null)
-          vpc_connector_arn = var.create_vpc_connector ? aws_apprunner_vpc_connector.this[0].arn : try(egress_configuration.value.vpc_connector_arn, null)
+          vpc_connector_arn = try(egress_configuration.value.vpc_connector_arn, null)
         }
       }
     }
@@ -59,8 +59,8 @@ resource "aws_apprunner_service" "this" {
     for_each = length(var.observability_configuration) > 0 ? [var.observability_configuration] : []
 
     content {
-      observability_configuration_arn = var.create_observability_configuration ? aws_apprunner_observability_configuration.this[0].arn : try(observability_configuration.value.observability_configuration_arn, null)
-      observability_enabled           = try(observability_configuration.value.observability_enabled, null)
+      observability_configuration_arn = observability_configuration.value.observability_configuration_arn
+      observability_enabled           = try(observability_configuration.value.observability_enabled, true)
     }
   }
 
@@ -277,7 +277,7 @@ resource "aws_iam_role" "instance" {
 }
 
 resource "aws_iam_role_policy_attachment" "instance_xray" {
-  count = local.create_instance_iam_role && try(var.observability_trace_configuration.vendor, null) == "AWSXRAY" ? 1 : 0
+  count = local.create_instance_iam_role && try(var.observability_configuration.value.observability_enabled, false) ? 1 : 0
 
   policy_arn = "arn:${data.aws_partition.current.id}:iam::aws:policy/AWSXRayDaemonWriteAccess"
   role       = aws_iam_role.instance[0].name
@@ -289,6 +289,50 @@ resource "aws_iam_role_policy_attachment" "instance" {
   policy_arn = each.value
   role       = aws_iam_role.instance[0].name
 }
+
+################################################################################
+# Custom Domain Association
+################################################################################
+
+locals {
+  create_custom_domain_association = var.create && var.create_custom_domain_association
+}
+
+resource "aws_apprunner_custom_domain_association" "this" {
+  count = local.create_custom_domain_association ? 1 : 0
+
+  domain_name          = var.domain_name
+  enable_www_subdomain = var.enable_www_subdomain
+  service_arn          = aws_apprunner_service.this[0].arn
+}
+
+# resource "aws_route53_record" "validation" {
+#   for_each = {
+#     for dvo in aws_apprunner_custom_domain_association.this[0].certificate_validation_records : dvo.name => {
+#       name   = dvo.name
+#       record = dvo.value
+#       type   = dvo.type
+#     } if local.create_custom_domain_association
+#   }
+
+#   allow_overwrite = true
+#   name            = each.value.name
+#   records         = [each.value.record]
+#   ttl             = 60
+#   type            = each.value.type
+#   zone_id         = var.hosted_zone_id
+# }
+
+# resource "aws_route53_record" "cname" {
+#   count = local.create_custom_domain_association ? 1 : 0
+
+#   allow_overwrite = true
+#   name            = var.domain_name
+#   records         = [aws_apprunner_custom_domain_association.this[0].dns_target]
+#   ttl             = 3600
+#   type            = "CNAME"
+#   zone_id         = var.hosted_zone_id
+# }
 
 ################################################################################
 # VPC Connector
@@ -352,81 +396,49 @@ resource "aws_security_group_rule" "this" {
 }
 
 ################################################################################
-# Autoscaling
+# Connection(s)
+################################################################################
+
+resource "aws_apprunner_connection" "this" {
+  for_each = { for k, v in var.connections : k => v if var.create }
+
+  connection_name = try(each.value.name, each.value.key)
+  provider_type   = try(each.value.provider_type, "GITHUB")
+
+  tags = merge(var.tags, try(each.value.tags, {}))
+}
+
+################################################################################
+# Auto-Scaling Configuration(s)
 ################################################################################
 
 resource "aws_apprunner_auto_scaling_configuration_version" "this" {
-  count = var.create && var.create_autoscaling_configuration ? 1 : 0
+  for_each = { for k, v in var.auto_scaling_configurations : k => v if var.create }
 
-  auto_scaling_configuration_name = try(coalesce(var.autoscaling_name, var.service_name), "")
+  auto_scaling_configuration_name = try(each.value.name, each.value.key)
+  max_concurrency                 = try(each.value.max_concurrency, null)
+  max_size                        = try(each.value.max_size, null)
+  min_size                        = try(each.value.min_size, null)
 
-  max_concurrency = var.autoscaling_max_concurrency
-  max_size        = var.autoscaling_max_size
-  min_size        = var.autoscaling_min_size
-
-  tags = var.tags
+  tags = merge(var.tags, try(each.value.tags, {}))
 }
 
 ################################################################################
-# Custom Domain Association
-################################################################################
-
-locals {
-  create_custom_domain_association = var.create && var.create_custom_domain_association
-}
-
-resource "aws_apprunner_custom_domain_association" "this" {
-  count = local.create_custom_domain_association ? 1 : 0
-
-  domain_name          = var.domain_name
-  enable_www_subdomain = var.enable_www_subdomain
-  service_arn          = aws_apprunner_service.this[0].arn
-}
-
-# resource "aws_route53_record" "validation" {
-#   for_each = {
-#     for dvo in aws_apprunner_custom_domain_association.this[0].certificate_validation_records : dvo.name => {
-#       name   = dvo.name
-#       record = dvo.value
-#       type   = dvo.type
-#     } if local.create_custom_domain_association
-#   }
-
-#   allow_overwrite = true
-#   name            = each.value.name
-#   records         = [each.value.record]
-#   ttl             = 60
-#   type            = each.value.type
-#   zone_id         = var.hosted_zone_id
-# }
-
-# resource "aws_route53_record" "cname" {
-#   count = local.create_custom_domain_association ? 1 : 0
-
-#   allow_overwrite = true
-#   name            = var.domain_name
-#   records         = [aws_apprunner_custom_domain_association.this[0].dns_target]
-#   ttl             = 3600
-#   type            = "CNAME"
-#   zone_id         = var.hosted_zone_id
-# }
-
-################################################################################
-# Observability Configuration
+# Observability Configuration(s)
 ################################################################################
 
 resource "aws_apprunner_observability_configuration" "this" {
-  count = var.create && var.create_observability_configuration ? 1 : 0
+  for_each = { for k, v in var.observability_configurations : k => v if var.create }
 
-  observability_configuration_name = try(coalesce(var.observability_configuration_name, var.service_name), "")
+  observability_configuration_name = try(each.value.name, each.value.key)
 
   dynamic "trace_configuration" {
-    for_each = length(var.observability_trace_configuration) > 0 ? [var.observability_trace_configuration] : []
+    for_each = try([each.value.trace_configuration], [])
 
     content {
       vendor = try(trace_configuration.value.vendor, "AWSXRAY")
     }
   }
 
-  tags = var.tags
+  tags = merge(var.tags, try(each.value.tags, {}))
 }

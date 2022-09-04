@@ -26,6 +26,12 @@ variable "service_name" {
   default     = ""
 }
 
+variable "auto_scaling_configuration_arn" {
+  description = "ARN of an App Runner automatic scaling configuration resource that you want to associate with your service. If not provided, App Runner associates the latest revision of a default auto scaling configuration"
+  type        = string
+  default     = null
+}
+
 variable "encryption_configuration" {
   description = "The encryption configuration for the service"
   type        = any
@@ -161,6 +167,34 @@ variable "instance_iam_role_policies" {
 }
 
 ################################################################################
+# Custom Domain Association
+################################################################################
+
+variable "create_custom_domain_association" {
+  description = "Determines whether a Custom Domain Association will be created"
+  type        = bool
+  default     = false
+}
+
+variable "domain_name" {
+  description = "The custom domain endpoint to association. Specify a base domain e.g., `example.com` or a subdomain e.g., `subdomain.example.com`"
+  type        = string
+  default     = ""
+}
+
+variable "enable_www_subdomain" {
+  description = "Whether to associate the subdomain with the App Runner service in addition to the base domain. Defaults to `true`"
+  type        = bool
+  default     = null
+}
+
+# variable "hosted_zone_id" {
+#   description = "The ID of the Route53 hosted zone that contains the domain for the `domain_name`"
+#   type        = string
+#   default     = ""
+# }
+
+################################################################################
 # VPC Connector
 ################################################################################
 
@@ -223,85 +257,31 @@ variable "security_group_rules" {
 }
 
 ################################################################################
-# Autoscaling
+# Connection(s)
 ################################################################################
 
-variable "create_autoscaling_configuration" {
-  description = "Determines whether an Auto Scaling Configuration will be created"
-  type        = bool
-  default     = true
-}
-
-variable "autoscaling_name" {
-  description = "The name of the auto scaling configuration"
-  type        = string
-  default     = null
-}
-
-variable "autoscaling_max_concurrency" {
-  description = "The maximal number of concurrent requests that you want an instance to process. When the number of concurrent requests goes over this limit, App Runner scales up your service"
-  type        = number
-  default     = null
-}
-
-variable "autoscaling_max_size" {
-  description = "The maximal number of instances that App Runner provisions for your service"
-  type        = number
-  default     = 1
-}
-
-variable "autoscaling_min_size" {
-  description = "The minimal number of instances that App Runner provisions for your service"
-  type        = number
-  default     = 1
+variable "connections" {
+  description = "Map of connection definitions to create"
+  type        = any
+  default     = {}
 }
 
 ################################################################################
-# Custom Domain Association
+# Autoscaling Configuration(s)
 ################################################################################
 
-variable "create_custom_domain_association" {
-  description = "Determines whether a Custom Domain Association will be created"
-  type        = bool
-  default     = false
+variable "auto_scaling_configurations" {
+  description = "Map of auto-scaling configuration definitions to create"
+  type        = any
+  default     = {}
 }
-
-variable "domain_name" {
-  description = "The custom domain endpoint to association. Specify a base domain e.g., `example.com` or a subdomain e.g., `subdomain.example.com`"
-  type        = string
-  default     = ""
-}
-
-variable "enable_www_subdomain" {
-  description = "Whether to associate the subdomain with the App Runner service in addition to the base domain. Defaults to `true`"
-  type        = bool
-  default     = null
-}
-
-# variable "hosted_zone_id" {
-#   description = "The ID of the Route53 hosted zone that contains the domain for the `domain_name`"
-#   type        = string
-#   default     = ""
-# }
 
 ################################################################################
-# Observability Configuration
+# Observability Configuration(s)
 ################################################################################
 
-variable "create_observability_configuration" {
-  description = "Determines whether an Observability Configuration will be created"
-  type        = bool
-  default     = false
-}
-
-variable "observability_configuration_name" {
-  description = "The name of the Observability Configuration"
-  type        = string
-  default     = ""
-}
-
-variable "observability_trace_configuration" {
-  description = "The Observability Configuration trace coniguration"
+variable "observability_configurations" {
+  description = "Map of observability configuration definitions to create"
   type        = any
   default     = {}
 }

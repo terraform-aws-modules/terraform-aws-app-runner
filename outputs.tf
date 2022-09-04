@@ -61,49 +61,6 @@ output "instance_iam_role_unique_id" {
 }
 
 ################################################################################
-# VPC Connector
-################################################################################
-
-output "vpc_connector_arn" {
-  description = "The Amazon Resource Name (ARN) of VPC connector"
-  value       = try(aws_apprunner_vpc_connector.this[0].arn, null)
-}
-
-output "vpc_connector_status" {
-  description = "The current state of the VPC connector. If the status of a connector revision is INACTIVE, it was deleted and can't be used. Inactive connector revisions are permanently removed some time after they are deleted"
-  value       = try(aws_apprunner_vpc_connector.this[0].status, null)
-}
-
-output "vpc_connector_revision" {
-  description = "The revision of VPC connector. It's unique among all the active connectors (\"Status\": \"ACTIVE\") that share the same Name"
-  value       = try(aws_apprunner_vpc_connector.this[0].vpc_connector_revision, null)
-}
-
-################################################################################
-# Autoscaling
-################################################################################
-
-output "autoscaling_configuration_arn" {
-  description = "ARN of this auto scaling configuration version"
-  value       = try(aws_apprunner_auto_scaling_configuration_version.this[0].arn, null)
-}
-
-output "autoscaling_configuration_revision" {
-  description = "The revision of this auto scaling configuration"
-  value       = try(aws_apprunner_auto_scaling_configuration_version.this[0].auto_scaling_configuration_revision, null)
-}
-
-output "autoscaling_configuration_latest" {
-  description = "Whether the auto scaling configuration has the highest `auto_scaling_configuration_revision` among all configurations that share the same `auto_scaling_configuration_name`"
-  value       = try(aws_apprunner_auto_scaling_configuration_version.this[0].latest, null)
-}
-
-output "autoscaling_configuration_status" {
-  description = "The current state of the auto scaling configuration. An INACTIVE configuration revision has been deleted and can't be used. It is permanently removed some time after deletion"
-  value       = try(aws_apprunner_auto_scaling_configuration_version.this[0].status, null)
-}
-
-################################################################################
 # Custom Domain Association
 ################################################################################
 
@@ -123,25 +80,61 @@ output "custom_domain_association_dns_target" {
 }
 
 ################################################################################
-# Observability Configuration
+# VPC Connector
 ################################################################################
 
-output "observability_configuration_arn" {
-  description = "ARN of this observability configuration"
-  value       = try(aws_apprunner_observability_configuration.this[0].arn, null)
+output "vpc_connector_arn" {
+  description = "The Amazon Resource Name (ARN) of VPC connector"
+  value       = try(aws_apprunner_vpc_connector.this[0].arn, null)
 }
 
-output "observability_configuration_revision" {
-  description = "The revision of the observability configuration"
-  value       = try(aws_apprunner_observability_configuration.this[0].observability_configuration_revision, null)
+output "vpc_connector_status" {
+  description = "The current state of the VPC connector. If the status of a connector revision is INACTIVE, it was deleted and can't be used. Inactive connector revisions are permanently removed some time after they are deleted"
+  value       = try(aws_apprunner_vpc_connector.this[0].status, null)
 }
 
-output "observability_configuration_latest" {
-  description = "Whether the observability configuration has the highest `observability_configuration_revision` among all configurations that share the same `observability_configuration_name`"
-  value       = try(aws_apprunner_observability_configuration.this[0].latest, null)
+output "vpc_connector_revision" {
+  description = "The revision of VPC connector. It's unique among all the active connectors (\"Status\": \"ACTIVE\") that share the same Name"
+  value       = try(aws_apprunner_vpc_connector.this[0].vpc_connector_revision, null)
 }
 
-output "observability_configuration_status" {
-  description = "The current state of the observability configuration. An `INACTIVE` configuration revision has been deleted and can't be used. It is permanently removed some time after deletion"
-  value       = try(aws_apprunner_observability_configuration.this[0].status, null)
+################################################################################
+# VPC Connector - Security Group
+################################################################################
+
+output "security_group_arn" {
+  description = "Amazon Resource Name (ARN) of the VPC connector security group"
+  value       = try(aws_security_group.this[0].arn, null)
+}
+
+output "security_group_id" {
+  description = "ID of the VPC connector security group"
+  value       = try(aws_security_group.this[0].id, null)
+}
+
+################################################################################
+# Connection(s)
+################################################################################
+
+output "connections" {
+  description = "Map of attribute maps for all connections created"
+  value       = aws_apprunner_connection.this
+}
+
+################################################################################
+# Auto-Scaling Configuration(s)
+################################################################################
+
+output "auto_scaling_configurations" {
+  description = "Map of attribute maps for all autosclaing configurations created"
+  value       = aws_apprunner_auto_scaling_configuration_version.this
+}
+
+################################################################################
+# Observability Configuration(s)
+################################################################################
+
+output "observability_configurations" {
+  description = "Map of attribute maps for all observability configurations created"
+  value       = aws_apprunner_observability_configuration.this
 }
