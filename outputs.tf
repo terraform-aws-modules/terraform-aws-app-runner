@@ -14,7 +14,7 @@ output "service_id" {
 
 output "service_url" {
   description = "A subdomain URL that App Runner generated for this service. You can use this URL to access your service web application"
-  value       = try(aws_apprunner_service.this[0].service_url, null)
+  value       = try("https://${aws_apprunner_service.this[0].service_url}", null)
 }
 
 output "service_status" {
@@ -99,20 +99,6 @@ output "vpc_connector_revision" {
 }
 
 ################################################################################
-# VPC Connector - Security Group
-################################################################################
-
-output "security_group_arn" {
-  description = "Amazon Resource Name (ARN) of the VPC connector security group"
-  value       = try(aws_security_group.this[0].arn, null)
-}
-
-output "security_group_id" {
-  description = "ID of the VPC connector security group"
-  value       = try(aws_security_group.this[0].id, null)
-}
-
-################################################################################
 # Connection(s)
 ################################################################################
 
@@ -131,10 +117,25 @@ output "auto_scaling_configurations" {
 }
 
 ################################################################################
-# Observability Configuration(s)
+# Observability Configuration
 ################################################################################
 
-output "observability_configurations" {
-  description = "Map of attribute maps for all observability configurations created"
-  value       = aws_apprunner_observability_configuration.this
+output "observability_configuration_arn" {
+  description = "ARN of this observability configuration"
+  value       = try(aws_apprunner_observability_configuration.this[0].arn, null)
+}
+
+output "observability_configuration_revision" {
+  description = "The revision of the observability configuration"
+  value       = try(aws_apprunner_observability_configuration.this[0].observability_configuration_revision, null)
+}
+
+output "observability_configuration_latest" {
+  description = "Whether the observability configuration has the highest `observability_configuration_revision` among all configurations that share the same `observability_configuration_name`"
+  value       = try(aws_apprunner_observability_configuration.this[0].latest, null)
+}
+
+output "observability_configuration_status" {
+  description = "The current state of the observability configuration. An `INACTIVE` configuration revision has been deleted and can't be used. It is permanently removed some time after deletion"
+  value       = try(aws_apprunner_observability_configuration.this[0].status, null)
 }

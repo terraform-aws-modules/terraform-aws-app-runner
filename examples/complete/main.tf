@@ -16,21 +16,67 @@ locals {
 # App Runner Module
 ################################################################################
 
+module "app_runner_shared_configs" {
+  source = "../.."
+
+  # Disable service resources
+  create_service = false
+
+  connections = {
+    # The AWS Connector for GitHub connects to your GitHub account is a one-time setup,
+    # You can reuse the connection for creating multiple App Runner services based on repositories in this account.
+    # After creation, you must complete the authentication handshake using the App Runner console.
+    github = {
+      provider_type = "GITHUB"
+    }
+  }
+
+  auto_scaling_configurations = {
+    mini = {
+      name            = "mini"
+      max_concurrency = 20
+      max_size        = 5
+      min_size        = 1
+
+      tags = {
+        Type = "Mini"
+      }
+    }
+
+    mega = {
+      name            = "mega"
+      max_concurrency = 200
+      max_size        = 25
+      min_size        = 5
+
+      tags = {
+        Type = "MEGA"
+      }
+    }
+  }
+
+  tags = local.tags
+}
+
 module "app_runner_code_base" {
   source = "../.."
 
-  service_name = "${local.name}-code-base2"
+  service_name = "${local.name}-code-base"
+
+  # Pulling from shared configs
+  auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mini"].arn
 
   source_configuration = {
     authentication_configuration = {
-      connection_arn = aws_apprunner_connection.this.arn
+      # Pulling from shared configs
+      connection_arn = module.app_runner_shared_configs.connections["github"].arn
     }
     auto_deployments_enabled = false
     code_repository = {
       code_configuration = {
         configuration_source = "REPOSITORY"
       }
-      repository_url = "https://github.com/aws-containers/hello-app-runner"
+      repository_url = "https://github.com/clowdhaus/hello-app-runner"
       source_code_version = {
         type  = "BRANCH"
         value = "main"
@@ -45,17 +91,12 @@ module "app_runner_code_base" {
 module "app_runner_image_base" {
   source = "../.."
 
-  service_name = "${local.name}-image-base2"
+  service_name = "${local.name}-image-base"
 
-  create_access_iam_role = true
-  access_iam_role_policies = {
-    "AWSAppRunnerServicePolicyForECRAccess" = "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
-  }
+  # Pulling from shared configs
+  auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mega"].arn
 
   source_configuration = {
-    # authentication_configuration = {
-    #   connection_arn = aws_apprunner_connection.this.arn
-    # }
     auto_deployments_enabled = false
     image_repository = {
       image_configuration = {
@@ -65,6 +106,22 @@ module "app_runner_image_base" {
       image_repository_type = "ECR_PUBLIC"
     }
   }
+
+  create_custom_domain_association = true
+  hosted_zone_id                   = "Z067530812I2IA0AIKZEV"
+  domain_name                      = "apprunner.sharedservices.clowd.haus"
+  enable_www_subdomain             = true
+
+  create_vpc_connector          = true
+  vpc_connector_subnets         = module.vpc.private_subnets
+  vpc_connector_security_groups = [module.security_group.security_group_id]
+  network_configuration = {
+    egress_configuration = {
+      egress_type = "VPC"
+    }
+  }
+
+  enable_observability_configuration = true
 
   tags = local.tags
 }
@@ -78,16 +135,6 @@ module "app_runner_disabled" {
 ################################################################################
 # Supporting Resources
 ################################################################################
-
-resource "aws_apprunner_connection" "this" {
-  # The AWS Connector for GitHub connects to your GitHub account is a one-time setup,
-  # You can reuse the connection for creating multiple App Runner services based on repositories in this account.
-  # After creation, you must complete the authentication handshake using the App Runner console.
-  connection_name = local.name
-  provider_type   = "GITHUB"
-
-  tags = local.tags
-}
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -115,10 +162,8 @@ module "security_group" {
   description = "Security group for AppRunner connector"
   vpc_id      = module.vpc.vpc_id
 
-  ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
-  ingress_rules       = ["all-all"]
-
-  egress_rules = ["all-all"]
+  egress_rules       = ["http-80-tcp"]
+  egress_cidr_blocks = module.vpc.private_subnets_cidr_blocks
 
   tags = local.tags
 }

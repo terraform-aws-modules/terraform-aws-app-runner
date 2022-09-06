@@ -48,23 +48,24 @@ resource "aws_apprunner_service" "this" {
         for_each = try([network_configuration.value.egress_configuration], [])
 
         content {
-          egress_type       = try(egress_configuration.value.egress_type, null)
-          vpc_connector_arn = try(egress_configuration.value.vpc_connector_arn, null)
+          egress_type       = try(egress_configuration.value.egress_type, "VPC")
+          vpc_connector_arn = try(egress_configuration.value.vpc_connector_arn, aws_apprunner_vpc_connector.this[0].arn, null)
         }
       }
     }
   }
 
   dynamic "observability_configuration" {
-    for_each = length(var.observability_configuration) > 0 ? [var.observability_configuration] : []
+    for_each = local.enable_observability_configuration ? [1] : []
 
     content {
-      observability_configuration_arn = observability_configuration.value.observability_configuration_arn
-      observability_enabled           = try(observability_configuration.value.observability_enabled, true)
+      observability_configuration_arn = aws_apprunner_observability_configuration.this[0].arn
+      observability_enabled           = true
     }
   }
 
   service_name = var.service_name
+
 
   dynamic "source_configuration" {
     for_each = [var.source_configuration]
@@ -79,7 +80,8 @@ resource "aws_apprunner_service" "this" {
         }
       }
 
-      auto_deployments_enabled = try(source_configuration.value.auto_deployments_enabled, null)
+      # Must be false when using public images or cross account images
+      auto_deployments_enabled = try(source_configuration.value.auto_deployments_enabled, false)
 
       dynamic "code_repository" {
         for_each = try([source_configuration.value.code_repository], [])
@@ -111,7 +113,7 @@ resource "aws_apprunner_service" "this" {
             for_each = [code_repository.value.source_code_version]
 
             content {
-              type  = source_code_version.value.type
+              type  = try(source_code_version.value.type, "BRANCH")
               value = source_code_version.value.value
             }
           }
@@ -295,7 +297,7 @@ resource "aws_iam_role_policy_attachment" "instance" {
 ################################################################################
 
 locals {
-  create_custom_domain_association = var.create && var.create_custom_domain_association
+  create_custom_domain_association = var.create && var.create_service && var.create_custom_domain_association
 }
 
 resource "aws_apprunner_custom_domain_association" "this" {
@@ -305,6 +307,17 @@ resource "aws_apprunner_custom_domain_association" "this" {
   enable_www_subdomain = var.enable_www_subdomain
   service_arn          = aws_apprunner_service.this[0].arn
 }
+
+# resource "aws_route53_record" "validation" {
+#   count = length(aws_apprunner_custom_domain_association.this[0].certificate_validation_records)
+
+#   allow_overwrite = true
+#   name            = aws_apprunner_custom_domain_association.this[0].certificate_validation_records.*.name[count.index]
+#   records         = [aws_apprunner_custom_domain_association.this[0].certificate_validation_records.*.value[count.index]]
+#   ttl             = 60
+#   type            = aws_apprunner_custom_domain_association.this[0].certificate_validation_records.*.type[count.index]
+#   zone_id         = var.hosted_zone_id
+# }
 
 # resource "aws_route53_record" "validation" {
 #   for_each = {
@@ -324,7 +337,7 @@ resource "aws_apprunner_custom_domain_association" "this" {
 # }
 
 # resource "aws_route53_record" "cname" {
-#   count = local.create_custom_domain_association ? 1 : 0
+#   count = local.create_custom_domain_association && var.domain_name_use_cname ? 1 : 0
 
 #   allow_overwrite = true
 #   name            = var.domain_name
@@ -334,12 +347,26 @@ resource "aws_apprunner_custom_domain_association" "this" {
 #   zone_id         = var.hosted_zone_id
 # }
 
+# resource "aws_route53_record" "alias" {
+#   count = local.create_custom_domain_association && var.domain_name_use_cname ? 1 : 0
+
+#   zone_id = var.hosted_zone_id
+#   name    = "example.com"
+#   type    = "A"
+
+#   alias {
+#     name                   = aws_elb.main.dns_name
+#     zone_id                = aws_elb.main.zone_id
+#     evaluate_target_health = true
+#   }
+# }
+
 ################################################################################
 # VPC Connector
 ################################################################################
 
 locals {
-  create_vpc_connector = var.create && var.create_vpc_connector
+  create_vpc_connector = var.create && var.create_service && var.create_vpc_connector
 
   vpc_connector_name = try(coalesce(var.vpc_connector_name, var.service_name), "")
 }
@@ -349,50 +376,9 @@ resource "aws_apprunner_vpc_connector" "this" {
 
   vpc_connector_name = local.vpc_connector_name
   subnets            = var.vpc_connector_subnets
-  security_groups    = compact(concat(var.vpc_connector_security_groups, try(aws_security_group.this[0].id, [])))
+  security_groups    = var.vpc_connector_security_groups
 
   tags = var.tags
-}
-
-################################################################################
-# VPC Connector - Security Group
-################################################################################
-
-resource "aws_security_group" "this" {
-  count = var.create_security_group && local.create_vpc_connector ? 1 : 0
-
-  name        = var.security_group_use_name_prefix ? null : local.vpc_connector_name
-  name_prefix = var.security_group_use_name_prefix ? "${local.vpc_connector_name}-" : null
-  description = var.security_group_description
-  vpc_id      = var.vpc_id
-
-  tags = merge(
-    var.tags,
-    { "Name" = local.vpc_connector_name },
-  )
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_security_group_rule" "this" {
-  for_each = { for k, v in var.security_group_rules : k => v if var.create_security_group && local.create_vpc_connector }
-
-  # Required
-  security_group_id = aws_security_group.this[0].id
-  protocol          = each.value.protocol
-  from_port         = each.value.from_port
-  to_port           = each.value.to_port
-  type              = "egress"
-
-  # Optional
-  description              = try(each.value.description, null)
-  cidr_blocks              = try(each.value.cidr_blocks, null)
-  ipv6_cidr_blocks         = try(each.value.ipv6_cidr_blocks, null)
-  prefix_list_ids          = try(each.value.prefix_list_ids, [])
-  self                     = try(each.value.self, null)
-  source_security_group_id = try(each.value.source_security_group_id, null)
 }
 
 ################################################################################
@@ -402,7 +388,7 @@ resource "aws_security_group_rule" "this" {
 resource "aws_apprunner_connection" "this" {
   for_each = { for k, v in var.connections : k => v if var.create }
 
-  connection_name = try(each.value.name, each.value.key)
+  connection_name = try(each.value.name, each.key)
   provider_type   = try(each.value.provider_type, "GITHUB")
 
   tags = merge(var.tags, try(each.value.tags, {}))
@@ -415,7 +401,7 @@ resource "aws_apprunner_connection" "this" {
 resource "aws_apprunner_auto_scaling_configuration_version" "this" {
   for_each = { for k, v in var.auto_scaling_configurations : k => v if var.create }
 
-  auto_scaling_configuration_name = try(each.value.name, each.value.key)
+  auto_scaling_configuration_name = try(each.value.name, each.key)
   max_concurrency                 = try(each.value.max_concurrency, null)
   max_size                        = try(each.value.max_size, null)
   min_size                        = try(each.value.min_size, null)
@@ -427,18 +413,18 @@ resource "aws_apprunner_auto_scaling_configuration_version" "this" {
 # Observability Configuration(s)
 ################################################################################
 
+locals {
+  enable_observability_configuration = var.create && var.create_service && var.enable_observability_configuration
+}
+
 resource "aws_apprunner_observability_configuration" "this" {
-  for_each = { for k, v in var.observability_configurations : k => v if var.create }
+  count = local.enable_observability_configuration ? 1 : 0
 
-  observability_configuration_name = try(each.value.name, each.value.key)
+  observability_configuration_name = var.service_name
 
-  dynamic "trace_configuration" {
-    for_each = try([each.value.trace_configuration], [])
-
-    content {
-      vendor = try(trace_configuration.value.vendor, "AWSXRAY")
-    }
+  trace_configuration {
+    vendor = "AWSXRAY"
   }
 
-  tags = merge(var.tags, try(each.value.tags, {}))
+  tags = var.tags
 }

@@ -188,11 +188,11 @@ variable "enable_www_subdomain" {
   default     = null
 }
 
-# variable "hosted_zone_id" {
-#   description = "The ID of the Route53 hosted zone that contains the domain for the `domain_name`"
-#   type        = string
-#   default     = ""
-# }
+variable "hosted_zone_id" {
+  description = "The ID of the Route53 hosted zone that contains the domain for the `domain_name`"
+  type        = string
+  default     = ""
+}
 
 ################################################################################
 # VPC Connector
@@ -223,40 +223,6 @@ variable "vpc_connector_security_groups" {
 }
 
 ################################################################################
-# VPC Connector - Security Group
-################################################################################
-
-variable "create_security_group" {
-  description = "Determines if a security group is created for the VPC connector"
-  type        = bool
-  default     = true
-}
-
-variable "vpc_id" {
-  description = "ID of the VPC where the security will be provisioned"
-  type        = string
-  default     = null
-}
-
-variable "security_group_use_name_prefix" {
-  description = "Determines whether the security group name (`security_group_name`) is used as a prefix"
-  type        = bool
-  default     = true
-}
-
-variable "security_group_description" {
-  description = "Description for the security group created"
-  type        = string
-  default     = null
-}
-
-variable "security_group_rules" {
-  description = "List of security group rules to add to the security group created"
-  type        = any
-  default     = {}
-}
-
-################################################################################
 # Connection(s)
 ################################################################################
 
@@ -277,11 +243,11 @@ variable "auto_scaling_configurations" {
 }
 
 ################################################################################
-# Observability Configuration(s)
+# Observability Configuration
 ################################################################################
 
-variable "observability_configurations" {
-  description = "Map of observability configuration definitions to create"
-  type        = any
-  default     = {}
+variable "enable_observability_configuration" {
+  description = "Determines whether an X-Ray Observability Configuration will be created and assigned to the service"
+  type        = bool
+  default     = true
 }

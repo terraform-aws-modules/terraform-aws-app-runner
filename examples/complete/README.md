@@ -26,9 +26,7 @@ Note that this example may create resources which will incur monetary charges on
 
 ## Providers
 
-| Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.0 |
+No providers.
 
 ## Modules
 
@@ -37,14 +35,13 @@ Note that this example may create resources which will incur monetary charges on
 | <a name="module_app_runner_code_base"></a> [app\_runner\_code\_base](#module\_app\_runner\_code\_base) | ../.. | n/a |
 | <a name="module_app_runner_disabled"></a> [app\_runner\_disabled](#module\_app\_runner\_disabled) | ../.. | n/a |
 | <a name="module_app_runner_image_base"></a> [app\_runner\_image\_base](#module\_app\_runner\_image\_base) | ../.. | n/a |
+| <a name="module_app_runner_shared_configs"></a> [app\_runner\_shared\_configs](#module\_app\_runner\_shared\_configs) | ../.. | n/a |
 | <a name="module_security_group"></a> [security\_group](#module\_security\_group) | terraform-aws-modules/security-group/aws | ~> 4.0 |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | ~> 3.0 |
 
 ## Resources
 
-| Name | Type |
-|------|------|
-| [aws_apprunner_connection.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apprunner_connection) | resource |
+No resources.
 
 ## Inputs
 
@@ -54,13 +51,10 @@ No inputs.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_auto_scaling_configurations"></a> [auto\_scaling\_configurations](#output\_auto\_scaling\_configurations) | Map of attribute maps for all autosclaing configurations created |
 | <a name="output_code_base_access_iam_role_arn"></a> [code\_base\_access\_iam\_role\_arn](#output\_code\_base\_access\_iam\_role\_arn) | The Amazon Resource Name (ARN) specifying the IAM role |
 | <a name="output_code_base_access_iam_role_name"></a> [code\_base\_access\_iam\_role\_name](#output\_code\_base\_access\_iam\_role\_name) | The name of the IAM role |
 | <a name="output_code_base_access_iam_role_unique_id"></a> [code\_base\_access\_iam\_role\_unique\_id](#output\_code\_base\_access\_iam\_role\_unique\_id) | Stable and unique string identifying the IAM role |
-| <a name="output_code_base_autoscaling_configuration_arn"></a> [code\_base\_autoscaling\_configuration\_arn](#output\_code\_base\_autoscaling\_configuration\_arn) | ARN of this auto scaling configuration version |
-| <a name="output_code_base_autoscaling_configuration_latest"></a> [code\_base\_autoscaling\_configuration\_latest](#output\_code\_base\_autoscaling\_configuration\_latest) | Whether the auto scaling configuration has the highest `auto_scaling_configuration_revision` among all configurations that share the same `auto_scaling_configuration_name` |
-| <a name="output_code_base_autoscaling_configuration_revision"></a> [code\_base\_autoscaling\_configuration\_revision](#output\_code\_base\_autoscaling\_configuration\_revision) | The revision of this auto scaling configuration |
-| <a name="output_code_base_autoscaling_configuration_status"></a> [code\_base\_autoscaling\_configuration\_status](#output\_code\_base\_autoscaling\_configuration\_status) | The current state of the auto scaling configuration. An INACTIVE configuration revision has been deleted and can't be used. It is permanently removed some time after deletion |
 | <a name="output_code_base_custom_domain_association_certificate_validation_records"></a> [code\_base\_custom\_domain\_association\_certificate\_validation\_records](#output\_code\_base\_custom\_domain\_association\_certificate\_validation\_records) | A set of certificate CNAME records used for this domain name |
 | <a name="output_code_base_custom_domain_association_dns_target"></a> [code\_base\_custom\_domain\_association\_dns\_target](#output\_code\_base\_custom\_domain\_association\_dns\_target) | The App Runner subdomain of the App Runner service. The custom domain name is mapped to this target name. Attribute only available if resource created (not imported) with Terraform |
 | <a name="output_code_base_custom_domain_association_id"></a> [code\_base\_custom\_domain\_association\_id](#output\_code\_base\_custom\_domain\_association\_id) | The `domain_name` and `service_arn` separated by a comma (`,`) |
@@ -78,13 +72,10 @@ No inputs.
 | <a name="output_code_base_vpc_connector_arn"></a> [code\_base\_vpc\_connector\_arn](#output\_code\_base\_vpc\_connector\_arn) | The Amazon Resource Name (ARN) of VPC connector |
 | <a name="output_code_base_vpc_connector_revision"></a> [code\_base\_vpc\_connector\_revision](#output\_code\_base\_vpc\_connector\_revision) | The revision of VPC connector. It's unique among all the active connectors ("Status": "ACTIVE") that share the same Name |
 | <a name="output_code_base_vpc_connector_status"></a> [code\_base\_vpc\_connector\_status](#output\_code\_base\_vpc\_connector\_status) | The current state of the VPC connector. If the status of a connector revision is INACTIVE, it was deleted and can't be used. Inactive connector revisions are permanently removed some time after they are deleted |
+| <a name="output_connections"></a> [connections](#output\_connections) | Map of attribute maps for all connections created |
 | <a name="output_image_base_access_iam_role_arn"></a> [image\_base\_access\_iam\_role\_arn](#output\_image\_base\_access\_iam\_role\_arn) | The Amazon Resource Name (ARN) specifying the IAM role |
 | <a name="output_image_base_access_iam_role_name"></a> [image\_base\_access\_iam\_role\_name](#output\_image\_base\_access\_iam\_role\_name) | The name of the IAM role |
 | <a name="output_image_base_access_iam_role_unique_id"></a> [image\_base\_access\_iam\_role\_unique\_id](#output\_image\_base\_access\_iam\_role\_unique\_id) | Stable and unique string identifying the IAM role |
-| <a name="output_image_base_autoscaling_configuration_arn"></a> [image\_base\_autoscaling\_configuration\_arn](#output\_image\_base\_autoscaling\_configuration\_arn) | ARN of this auto scaling configuration version |
-| <a name="output_image_base_autoscaling_configuration_latest"></a> [image\_base\_autoscaling\_configuration\_latest](#output\_image\_base\_autoscaling\_configuration\_latest) | Whether the auto scaling configuration has the highest `auto_scaling_configuration_revision` among all configurations that share the same `auto_scaling_configuration_name` |
-| <a name="output_image_base_autoscaling_configuration_revision"></a> [image\_base\_autoscaling\_configuration\_revision](#output\_image\_base\_autoscaling\_configuration\_revision) | The revision of this auto scaling configuration |
-| <a name="output_image_base_autoscaling_configuration_status"></a> [image\_base\_autoscaling\_configuration\_status](#output\_image\_base\_autoscaling\_configuration\_status) | The current state of the auto scaling configuration. An INACTIVE configuration revision has been deleted and can't be used. It is permanently removed some time after deletion |
 | <a name="output_image_base_custom_domain_association_certificate_validation_records"></a> [image\_base\_custom\_domain\_association\_certificate\_validation\_records](#output\_image\_base\_custom\_domain\_association\_certificate\_validation\_records) | A set of certificate CNAME records used for this domain name |
 | <a name="output_image_base_custom_domain_association_dns_target"></a> [image\_base\_custom\_domain\_association\_dns\_target](#output\_image\_base\_custom\_domain\_association\_dns\_target) | The App Runner subdomain of the App Runner service. The custom domain name is mapped to this target name. Attribute only available if resource created (not imported) with Terraform |
 | <a name="output_image_base_custom_domain_association_id"></a> [image\_base\_custom\_domain\_association\_id](#output\_image\_base\_custom\_domain\_association\_id) | The `domain_name` and `service_arn` separated by a comma (`,`) |
