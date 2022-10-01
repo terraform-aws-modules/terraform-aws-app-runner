@@ -113,4 +113,4 @@ Note that this example may create resources which will incur monetary charges on
 | <a name="output_image_base_vpc_connector_status"></a> [image\_base\_vpc\_connector\_status](#output\_image\_base\_vpc\_connector\_status) | The current state of the VPC connector. If the status of a connector revision is INACTIVE, it was deleted and can't be used. Inactive connector revisions are permanently removed some time after they are deleted |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
-Apache-2.0 Licensed. See [LICENSE](https://github.com/clowdhaus/terraform-aws-app-runner/blob/main/LICENSE).
+Apache-2.0 Licensed. See [LICENSE](https://github.com/terraform-aws-modules/terraform-aws-app-runner/blob/master/LICENSE).

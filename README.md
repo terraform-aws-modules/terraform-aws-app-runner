@@ -2,13 +2,17 @@
 
 Terraform module which creates AWS App Runner resources.
 
+[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
+
 ## Usage
+
+See [`examples`](https://github.com/terraform-aws-modules/terraform-aws-app-runner/tree/master/examples) directory for working examples to reference:
 
 ### AppRunner Common/Shared Configurations
 
 ```hcl
 module "app_runner_shared_configs" {
-  source = "clowdhaus/app-runner/aws"
+  source = "terraform-aws-modules/app-runner/aws"
 
   # Disable service resources
   create_service = false
@@ -57,7 +61,7 @@ module "app_runner_shared_configs" {
 
 ```hcl
 module "app_runner_code_base" {
-  source = "clowdhaus/app-runner/aws"
+  source = "terraform-aws-modules/app-runner/aws"
 
   service_name = "example-code-base"
 
@@ -93,7 +97,7 @@ module "app_runner_code_base" {
 
 ```hcl
 module "app_runner_image_base" {
-  source = "clowdhaus/app-runner/aws"
+  source = "terraform-aws-modules/app-runner/aws"
 
   service_name = "example-image-base"
 
@@ -131,9 +135,9 @@ module "app_runner_image_base" {
 
 ## Examples
 
-Examples codified under the [`examples`](https://github.com/clowdhaus/terraform-aws-app-runner/tree/main/examples) are intended to give users references for how to use the module(s) as well as testing/validating changes to the source code of the module. If contributing to the project, please be sure to make any appropriate updates to the relevant examples to allow maintainers to test your changes and to keep the examples up to date for users. Thank you!
+Examples codified under the [`examples`](https://github.com/terraform-aws-modules/terraform-aws-app-runner/tree/master/examples) are intended to give users references for how to use the module(s) as well as testing/validating changes to the source code of the module. If contributing to the project, please be sure to make any appropriate updates to the relevant examples to allow maintainers to test your changes and to keep the examples up to date for users. Thank you!
 
-- [Complete](https://github.com/clowdhaus/terraform-aws-app-runner/tree/main/examples/complete)
+- [Complete](https://github.com/terraform-aws-modules/terraform-aws-app-runner/tree/master/examples/complete)
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -246,4 +250,4 @@ No modules.
 
 ## License
 
-Apache-2.0 Licensed. See [LICENSE](https://github.com/clowdhaus/terraform-aws-app-runner/blob/main/LICENSE).
+Apache-2.0 Licensed. See [LICENSE](https://github.com/terraform-aws-modules/terraform-aws-app-runner/blob/master/LICENSE).
