@@ -107,10 +107,11 @@ module "app_runner_image_base" {
     }
   }
 
-  create_custom_domain_association = true
-  hosted_zone_id                   = "Z067530812I2IA0AIKZEV"
-  domain_name                      = "apprunner.sharedservices.clowd.haus"
-  enable_www_subdomain             = true
+  # # Requires manual intervention to validate records
+  # create_custom_domain_association = true
+  # hosted_zone_id                   = "Z067530812I2IA0AIKZEV"
+  # domain_name                      = "apprunner.sharedservices.clowd.haus"
+  # enable_www_subdomain             = true
 
   create_vpc_connector          = true
   vpc_connector_subnets         = module.vpc.private_subnets

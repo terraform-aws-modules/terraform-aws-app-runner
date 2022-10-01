@@ -308,6 +308,7 @@ resource "aws_apprunner_custom_domain_association" "this" {
   service_arn          = aws_apprunner_service.this[0].arn
 }
 
+# # Requires manual intervention to validate records
 # resource "aws_route53_record" "validation" {
 #   count = length(aws_apprunner_custom_domain_association.this[0].certificate_validation_records)
 
@@ -348,15 +349,15 @@ resource "aws_apprunner_custom_domain_association" "this" {
 # }
 
 # resource "aws_route53_record" "alias" {
-#   count = local.create_custom_domain_association && var.domain_name_use_cname ? 1 : 0
+#   for_each = { for k, v in toset(["A", "AAAA"]) : k => v if local.create_custom_domain_association && var.domain_name_use_cname }
 
 #   zone_id = var.hosted_zone_id
-#   name    = "example.com"
-#   type    = "A"
+#   name    = var.domain_name
+#   type    = each.value
 
 #   alias {
-#     name                   = aws_elb.main.dns_name
-#     zone_id                = aws_elb.main.zone_id
+#     name                   = aws_apprunner_service.this[0].service_url
+#     zone_id                = <TODO> ???
 #     evaluate_target_health = true
 #   }
 # }

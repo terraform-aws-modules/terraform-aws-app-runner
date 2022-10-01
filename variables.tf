@@ -188,11 +188,11 @@ variable "enable_www_subdomain" {
   default     = null
 }
 
-variable "hosted_zone_id" {
-  description = "The ID of the Route53 hosted zone that contains the domain for the `domain_name`"
-  type        = string
-  default     = ""
-}
+# variable "hosted_zone_id" {
+#   description = "The ID of the Route53 hosted zone that contains the domain for the `domain_name`"
+#   type        = string
+#   default     = ""
+# }
 
 ################################################################################
 # VPC Connector
