@@ -2,17 +2,29 @@
 
 Configuration in this directory creates:
 
-- <XXX>
+- AppRunner shared configurations for:
+  - GitHub connection
+  - Autoscaling configuration for a "min" and "max" examples
+- A code based AppRunner service
+  - Utilizes "min" autoscaling configuration created in shared configs
+- An image based AppRunner service
+  - Utilizes "mega" autoscaling configuration created in shared configs
+  - Creates a VPC connector to the associated VPC private subnets
 
 ## Usage
 
 To run this example you need to execute:
 
+1. Fork [this repository](https://github.com/aws-containers/hello-app-runner) to the account/organization associated with the GitHub connection that will be created
+
+2.
 ```bash
 $ terraform init
 $ terraform plan
-$ terraform apply
+$ terraform apply -var="repository_url=<URL_TO_FORKED_REPOSITORY>"
 ```
+
+3. Once you have entered `yes` at the prompt, you will need to navigate to the AppRunner console -> GitHub connections -> Complete the handshake for the connection created by this example.
 
 Note that this example may create resources which will incur monetary charges on your AWS bill. Run `terraform destroy` when you no longer need these resources.
 
@@ -22,11 +34,13 @@ Note that this example may create resources which will incur monetary charges on
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.22 |
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.22 |
 
 ## Modules
 
@@ -41,11 +55,15 @@ No providers.
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 
 ## Inputs
 
-No inputs.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_repository_url"></a> [repository\_url](#input\_repository\_url) | Location of the repository that contains the source code. Repository must be located in same scope as the GitHub connection (user's profile or organization) | `string` | `"https://github.com/aws-containers/hello-app-runner"` | no |
 
 ## Outputs
 

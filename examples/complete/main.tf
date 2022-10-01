@@ -76,7 +76,7 @@ module "app_runner_code_base" {
       code_configuration = {
         configuration_source = "REPOSITORY"
       }
-      repository_url = "https://github.com/clowdhaus/hello-app-runner"
+      repository_url = var.repository_url
       source_code_version = {
         type  = "BRANCH"
         value = "main"
@@ -108,9 +108,10 @@ module "app_runner_image_base" {
   }
 
   # # Requires manual intervention to validate records
+  # # https://github.com/hashicorp/terraform-provider-aws/issues/23460
   # create_custom_domain_association = true
-  # hosted_zone_id                   = "Z067530812I2IA0AIKZEV"
-  # domain_name                      = "apprunner.sharedservices.clowd.haus"
+  # hosted_zone_id                   = "<TODO>"
+  # domain_name                      = "<TODO>"
   # enable_www_subdomain             = true
 
   create_vpc_connector          = true
@@ -137,16 +138,23 @@ module "app_runner_disabled" {
 # Supporting Resources
 ################################################################################
 
+data "aws_availability_zones" "available" {}
+
+locals {
+  vpc_cidr = "10.0.0.0/16"
+  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
+}
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 3.0"
 
   name = local.name
-  cidr = "10.99.0.0/18"
+  cidr = local.vpc_cidr
 
-  azs             = ["${local.region}a", "${local.region}b", "${local.region}c"]
-  public_subnets  = ["10.99.0.0/24", "10.99.1.0/24", "10.99.2.0/24"]
-  private_subnets = ["10.99.3.0/24", "10.99.4.0/24", "10.99.5.0/24"]
+  azs             = local.azs
+  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 4, k)]
+  public_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 48)]
 
   enable_nat_gateway      = false
   single_nat_gateway      = true

@@ -4,11 +4,123 @@ Terraform module which creates AWS App Runner resources.
 
 ## Usage
 
-See [`examples`](https://github.com/clowdhaus/terraform-aws-app-runner/tree/main/examples) directory for working examples to reference:
+### AppRunner Common/Shared Configurations
 
 ```hcl
-module "app_runner" {
+module "app_runner_shared_configs" {
   source = "clowdhaus/app-runner/aws"
+
+  # Disable service resources
+  create_service = false
+
+  connections = {
+    # The AWS Connector for GitHub connects to your GitHub account is a one-time setup,
+    # You can reuse the connection for creating multiple App Runner services based on repositories in this account.
+    # After creation, you must complete the authentication handshake using the App Runner console.
+    github = {
+      provider_type = "GITHUB"
+    }
+  }
+
+  auto_scaling_configurations = {
+    mini = {
+      name            = "mini"
+      max_concurrency = 20
+      max_size        = 5
+      min_size        = 1
+
+      tags = {
+        Type = "Mini"
+      }
+    }
+
+    mega = {
+      name            = "mega"
+      max_concurrency = 200
+      max_size        = 25
+      min_size        = 5
+
+      tags = {
+        Type = "MEGA"
+      }
+    }
+  }
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
+}
+```
+
+### Code Based AppRunner Service
+
+```hcl
+module "app_runner_code_base" {
+  source = "clowdhaus/app-runner/aws"
+
+  service_name = "example-code-base"
+
+  # From shared configs created above
+  auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mini"].arn
+
+  source_configuration = {
+    authentication_configuration = {
+      # From shared configs created above
+      connection_arn = module.app_runner_shared_configs.connections["github"].arn
+    }
+    auto_deployments_enabled = false
+    code_repository = {
+      code_configuration = {
+        configuration_source = "REPOSITORY"
+      }
+      repository_url = "https://github.com/aws-containers/hello-app-runner"
+      source_code_version = {
+        type  = "BRANCH"
+        value = "main"
+      }
+    }
+  }
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
+}
+```
+
+### Image Based AppRunner Service
+
+```hcl
+module "app_runner_image_base" {
+  source = "clowdhaus/app-runner/aws"
+
+  service_name = "example-image-base"
+
+  # From shared configs
+  auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mega"].arn
+
+  source_configuration = {
+    auto_deployments_enabled = false
+    image_repository = {
+      image_configuration = {
+        port = 8000
+      }
+      image_identifier      = "public.ecr.aws/aws-containers/hello-app-runner:latest"
+      image_repository_type = "ECR_PUBLIC"
+    }
+  }
+
+  create_vpc_connector          = true
+  vpc_connector_subnets         = ["subnet-abcde012", "subnet-bcde012a", "subnet-fghi345a"]
+  vpc_connector_security_groups = ["sg-12345678"]
+  network_configuration = {
+    egress_configuration = {
+      egress_type = "VPC"
+    }
+  }
+
+  enable_observability_configuration = true
 
   tags = {
     Terraform   = "true"
@@ -29,13 +141,13 @@ Examples codified under the [`examples`](https://github.com/clowdhaus/terraform-
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.22 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.22 |
 
 ## Modules
 
@@ -56,7 +168,7 @@ No modules.
 | [aws_iam_role.instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.access_additional](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.instance_additional](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.instance_xray](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_policy_document.access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.access_assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |

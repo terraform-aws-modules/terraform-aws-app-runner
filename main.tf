@@ -4,8 +4,12 @@ data "aws_partition" "current" {}
 # Service
 ################################################################################
 
+locals {
+  create_service = var.create && var.create_service
+}
+
 resource "aws_apprunner_service" "this" {
-  count = var.create && var.create_service ? 1 : 0
+  count = local.create_service ? 1 : 0
 
   auto_scaling_configuration_arn = var.auto_scaling_configuration_arn
 
@@ -35,7 +39,7 @@ resource "aws_apprunner_service" "this" {
 
     content {
       cpu               = try(instance_configuration.value.cpu, null)
-      instance_role_arn = var.create_instance_iam_role ? aws_iam_role.instance[0].arn : try(instance_configuration.value.instance_role_arn, null)
+      instance_role_arn = var.create_instance_iam_role ? aws_iam_role.instance[0].arn : lookup(instance_configuration.value, "instance_role_arn", null)
       memory            = try(instance_configuration.value.memory, null)
     }
   }
@@ -149,9 +153,8 @@ resource "aws_apprunner_service" "this" {
 ################################################################################
 
 locals {
-  create_access_iam_role = var.create && var.create_service && var.create_access_iam_role
-
-  access_iam_role_name = try(coalesce(var.access_iam_role_name, "${var.service_name}-access"), "")
+  create_access_iam_role = local.create_service && var.create_access_iam_role
+  access_iam_role_name   = try(coalesce(var.access_iam_role_name, "${var.service_name}-access"), "")
 }
 
 data "aws_iam_policy_document" "access_assume_role" {
@@ -244,9 +247,8 @@ resource "aws_iam_role_policy_attachment" "access_additional" {
 ################################################################################
 
 locals {
-  create_instance_iam_role = var.create && var.create_service && var.create_instance_iam_role
-
-  instance_iam_role_name = try(coalesce(var.instance_iam_role_name, "${var.service_name}-instance"), "")
+  create_instance_iam_role = local.create_service && var.create_instance_iam_role
+  instance_iam_role_name   = try(coalesce(var.instance_iam_role_name, "${var.service_name}-instance"), "")
 }
 
 data "aws_iam_policy_document" "instance_assume_role" {
@@ -285,7 +287,7 @@ resource "aws_iam_role_policy_attachment" "instance_xray" {
   role       = aws_iam_role.instance[0].name
 }
 
-resource "aws_iam_role_policy_attachment" "instance" {
+resource "aws_iam_role_policy_attachment" "instance_additional" {
   for_each = { for k, v in var.instance_iam_role_policies : k => v if local.create_instance_iam_role }
 
   policy_arn = each.value
@@ -297,7 +299,7 @@ resource "aws_iam_role_policy_attachment" "instance" {
 ################################################################################
 
 locals {
-  create_custom_domain_association = var.create && var.create_service && var.create_custom_domain_association
+  create_custom_domain_association = local.create_service && var.create_custom_domain_association
 }
 
 resource "aws_apprunner_custom_domain_association" "this" {
@@ -309,6 +311,7 @@ resource "aws_apprunner_custom_domain_association" "this" {
 }
 
 # # Requires manual intervention to validate records
+# # https://github.com/hashicorp/terraform-provider-aws/issues/23460
 # resource "aws_route53_record" "validation" {
 #   count = length(aws_apprunner_custom_domain_association.this[0].certificate_validation_records)
 
@@ -367,9 +370,8 @@ resource "aws_apprunner_custom_domain_association" "this" {
 ################################################################################
 
 locals {
-  create_vpc_connector = var.create && var.create_service && var.create_vpc_connector
-
-  vpc_connector_name = try(coalesce(var.vpc_connector_name, var.service_name), "")
+  create_vpc_connector = local.create_service && var.create_vpc_connector
+  vpc_connector_name   = try(coalesce(var.vpc_connector_name, var.service_name), "")
 }
 
 resource "aws_apprunner_vpc_connector" "this" {
@@ -415,7 +417,7 @@ resource "aws_apprunner_auto_scaling_configuration_version" "this" {
 ################################################################################
 
 locals {
-  enable_observability_configuration = var.create && var.create_service && var.enable_observability_configuration
+  enable_observability_configuration = local.create_service && var.enable_observability_configuration
 }
 
 resource "aws_apprunner_observability_configuration" "this" {
