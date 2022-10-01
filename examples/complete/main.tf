@@ -7,8 +7,9 @@ locals {
   name   = "ex-${replace(basename(path.cwd), "_", "-")}"
 
   tags = {
-    Example    = local.name
-    Repository = "https://github.com/clowdhaus/terraform-aws-app-runner"
+    Name       = local.name
+    Example    = "complete"
+    Repository = "https://github.com/terraform-aws-modules/terraform-aws-app-runner"
   }
 }
 
