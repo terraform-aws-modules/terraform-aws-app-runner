@@ -88,7 +88,6 @@ module "app_runner_code_base" {
   tags = local.tags
 }
 
-
 module "app_runner_image_base" {
   source = "../.."
 
@@ -129,6 +128,47 @@ module "app_runner_image_base" {
   tags = local.tags
 }
 
+module "app_runner_private" {
+  source = "../.."
+
+  service_name = "${local.name}-private"
+
+  # Pulling from shared configs
+  auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mega"].arn
+
+  source_configuration = {
+    auto_deployments_enabled = false
+    image_repository = {
+      image_configuration = {
+        port = 8000
+      }
+      image_identifier      = "public.ecr.aws/aws-containers/hello-app-runner:latest"
+      image_repository_type = "ECR_PUBLIC"
+    }
+  }
+
+  create_ingress_vpc_connection = true
+  ingress_vpc_id                = module.vpc.vpc_id
+  ingress_vpc_endpoint_id       = module.vpc_endpoints.endpoints["apprunner"].id
+
+  create_vpc_connector          = true
+  vpc_connector_subnets         = module.vpc.private_subnets
+  vpc_connector_security_groups = [module.security_group.security_group_id]
+
+  network_configuration = {
+    ingress_configuration = {
+      is_publicly_accessible = false
+    }
+    egress_configuration = {
+      egress_type = "VPC"
+    }
+  }
+
+  enable_observability_configuration = true
+
+  tags = local.tags
+}
+
 module "app_runner_disabled" {
   source = "../.."
 
@@ -159,7 +199,26 @@ module "vpc" {
 
   enable_nat_gateway      = false
   single_nat_gateway      = true
+  enable_dns_hostnames    = true
   map_public_ip_on_launch = false
+
+  tags = local.tags
+}
+
+module "vpc_endpoints" {
+  source = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
+
+  vpc_id             = module.vpc.vpc_id
+  security_group_ids = [module.vpc_endpoints_security_group.security_group_id]
+
+  endpoints = {
+    apprunner = {
+      service = "apprunner.requests"
+      # private_dns_enabled = true
+      subnet_ids = module.vpc.private_subnets
+      tags       = { Name = "${local.name}-apprunner" }
+    },
+  }
 
   tags = local.tags
 }
@@ -174,6 +233,20 @@ module "security_group" {
 
   egress_rules       = ["http-80-tcp"]
   egress_cidr_blocks = module.vpc.private_subnets_cidr_blocks
+
+  tags = local.tags
+}
+
+module "vpc_endpoints_security_group" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 4.0"
+
+  name        = "${local.name}-vpc-endpoints"
+  description = "Security group for VPC Endpoints"
+  vpc_id      = module.vpc.vpc_id
+
+  egress_rules       = ["https-443-tcp"]
+  egress_cidr_blocks = [module.vpc.vpc_cidr_block]
 
   tags = local.tags
 }

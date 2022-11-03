@@ -167,6 +167,28 @@ variable "instance_iam_role_policies" {
 }
 
 ################################################################################
+# VPC Ingress Configuration
+################################################################################
+
+variable "create_ingress_vpc_connection" {
+  description = "Determines whether a VPC ingress configuration will be created"
+  type        = bool
+  default     = false
+}
+
+variable "ingress_vpc_id" {
+  description = "The ID of the VPC that is used for the VPC ingress configuration"
+  type        = string
+  default     = ""
+}
+
+variable "ingress_vpc_endpoint_id" {
+  description = "The ID of the VPC endpoint that is used for the VPC ingress configuration"
+  type        = string
+  default     = ""
+}
+
+################################################################################
 # Custom Domain Association
 ################################################################################
 
