@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0](https://github.com/terraform-aws-modules/terraform-aws-app-runner/compare/v1.0.1...v1.1.0) (2022-11-04)
+
+
+### Features
+
+* Add support for creating private services with VPC ingress connection ([#2](https://github.com/terraform-aws-modules/terraform-aws-app-runner/issues/2)) ([214af5c](https://github.com/terraform-aws-modules/terraform-aws-app-runner/commit/214af5ceafc2f9c2f7edd1c91ffa076edd3075e0))
+
 ### [1.0.1](https://github.com/terraform-aws-modules/terraform-aws-app-runner/compare/v1.0.0...v1.0.1) (2022-10-29)
 
 
