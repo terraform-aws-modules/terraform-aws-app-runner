@@ -48,6 +48,14 @@ resource "aws_apprunner_service" "this" {
     for_each = length(var.network_configuration) > 0 ? [var.network_configuration] : []
 
     content {
+      dynamic "ingress_configuration" {
+        for_each = try([network_configuration.value.ingress_configuration], [])
+
+        content {
+          is_publicly_accessible = try(ingress_configuration.value.is_publicly_accessible, null)
+        }
+      }
+
       dynamic "egress_configuration" {
         for_each = try([network_configuration.value.egress_configuration], [])
 
@@ -292,6 +300,24 @@ resource "aws_iam_role_policy_attachment" "instance_additional" {
 
   policy_arn = each.value
   role       = aws_iam_role.instance[0].name
+}
+
+################################################################################
+# VPC Ingress Configuration
+################################################################################
+
+resource "aws_apprunner_vpc_ingress_connection" "this" {
+  count = local.create_service && var.create_ingress_vpc_connection ? 1 : 0
+
+  name        = var.service_name
+  service_arn = aws_apprunner_service.this[0].arn
+
+  ingress_vpc_configuration {
+    vpc_id          = var.ingress_vpc_id
+    vpc_endpoint_id = var.ingress_vpc_endpoint_id
+  }
+
+  tags = var.tags
 }
 
 ################################################################################

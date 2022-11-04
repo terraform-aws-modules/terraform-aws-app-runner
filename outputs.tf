@@ -61,6 +61,20 @@ output "instance_iam_role_unique_id" {
 }
 
 ################################################################################
+# VPC Ingress Configuration
+################################################################################
+
+output "vpc_ingress_connection_arn" {
+  description = "The Amazon Resource Name (ARN) of the VPC Ingress Connection"
+  value       = try(aws_apprunner_vpc_ingress_connection.this[0].arn, null)
+}
+
+output "vpc_ingress_connection_domain_name" {
+  description = "The domain name associated with the VPC Ingress Connection resource"
+  value       = try(aws_apprunner_vpc_ingress_connection.this[0].domain_name, null)
+}
+
+################################################################################
 # Custom Domain Association
 ################################################################################
 
@@ -112,7 +126,7 @@ output "connections" {
 ################################################################################
 
 output "auto_scaling_configurations" {
-  description = "Map of attribute maps for all autosclaing configurations created"
+  description = "Map of attribute maps for all autoscaling configurations created"
   value       = aws_apprunner_auto_scaling_configuration_version.this
 }
 
