@@ -96,11 +96,23 @@ module "app_runner_image_base" {
   # Pulling from shared configs
   auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mega"].arn
 
+  # Creating IAM instance profile to access secrets
+  create_instance_iam_role = true
+  instance_iam_role_policies = {
+    secrets_policy = aws_iam_policy.instance_policy.arn
+  }
+
   source_configuration = {
     auto_deployments_enabled = false
     image_repository = {
       image_configuration = {
         port = 8000
+        runtime_environment_variables = {
+          MY_VARIABLE = "hello!"
+        }
+        runtime_environment_secrets = {
+          MY_SECRET = aws_secretsmanager_secret.example_secret.arn
+        }
       }
       image_identifier      = "public.ecr.aws/aws-containers/hello-app-runner:latest"
       image_repository_type = "ECR_PUBLIC"
@@ -136,11 +148,23 @@ module "app_runner_private" {
   # Pulling from shared configs
   auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mega"].arn
 
+  # Creating IAM instance profile to access secrets
+  create_instance_iam_role = true
+  instance_iam_role_policies = {
+    secrets_policy = aws_iam_policy.instance_policy.arn
+  }
+
   source_configuration = {
     auto_deployments_enabled = false
     image_repository = {
       image_configuration = {
         port = 8000
+        runtime_environment_variables = {
+          MY_VARIABLE = "hello!"
+        }
+        runtime_environment_secrets = {
+          MY_SECRET = aws_secretsmanager_secret.example_secret.arn
+        }
       }
       image_identifier      = "public.ecr.aws/aws-containers/hello-app-runner:latest"
       image_repository_type = "ECR_PUBLIC"
@@ -249,4 +273,30 @@ module "vpc_endpoints_security_group" {
   egress_cidr_blocks = [module.vpc.vpc_cidr_block]
 
   tags = local.tags
+}
+
+resource "aws_secretsmanager_secret" "example_secret" {
+  name = "FRIENDLY-SECRET-NAME"
+  # The below recovery window is set to 0 to allow instantaneous deletion by Terraform
+  recovery_window_in_days = 0
+}
+resource "aws_secretsmanager_secret_version" "example_secret_value" {
+  secret_id     = aws_secretsmanager_secret.example_secret.id
+  secret_string = "this is my secret string!"
+}
+
+data "aws_iam_policy_document" "secrets_access_policy_content" {
+  statement {
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "kms:Decrypt*"
+    ]
+    resources = ["*"]
+    effect    = "Allow"
+  }
+}
+
+resource "aws_iam_policy" "instance_policy" {
+  name   = "app-runner-secret-access-policy"
+  policy = data.aws_iam_policy_document.secrets_access_policy_content.json
 }

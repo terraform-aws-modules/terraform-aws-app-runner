@@ -104,11 +104,23 @@ module "app_runner_image_base" {
   # From shared configs
   auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mega"].arn
 
+  # Creating IAM instance profile to access secrets
+  create_instance_iam_role = true
+  instance_iam_role_policies = {
+    secrets_policy = aws_iam_policy.instance_policy.arn
+  }
+
   source_configuration = {
     auto_deployments_enabled = false
     image_repository = {
       image_configuration = {
         port = 8000
+        runtime_environment_variables = {
+          MY_VARIABLE = "hello!"
+        }
+        runtime_environment_secrets = {
+          MY_SECRET = aws_secretsmanager_secret.example_secret.arn
+        }
       }
       image_identifier      = "public.ecr.aws/aws-containers/hello-app-runner:latest"
       image_repository_type = "ECR_PUBLIC"
@@ -181,13 +193,13 @@ Examples codified under the [`examples`](https://github.com/terraform-aws-module
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.38 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.51 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.38 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.51 |
 
 ## Modules
 
