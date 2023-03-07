@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0](https://github.com/terraform-aws-modules/terraform-aws-app-runner/compare/v1.1.1...v1.2.0) (2023-03-07)
+
+
+### Features
+
+* Add support for runtime_environment_secrets ([#5](https://github.com/terraform-aws-modules/terraform-aws-app-runner/issues/5)) ([1a159d7](https://github.com/terraform-aws-modules/terraform-aws-app-runner/commit/1a159d73c657b864eaf20e158db3dfb1f23a33ec))
+
 ### [1.1.1](https://github.com/terraform-aws-modules/terraform-aws-app-runner/compare/v1.1.0...v1.1.1) (2023-02-01)
 
 
