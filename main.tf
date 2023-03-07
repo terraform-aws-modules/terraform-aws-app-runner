@@ -6,6 +6,29 @@ data "aws_partition" "current" {}
 
 locals {
   create_service = var.create && var.create_service
+
+  # Ensure instance role created is attached even if no values are provided via `var.instance_configuration`
+  instance_configuration = local.create_instance_iam_role ? merge(
+    var.instance_configuration,
+    { instance_role_arn = aws_iam_role.instance[0].arn }
+  ) : var.instance_configuration
+
+  # Ensure access role created is attached even if no values are provided via `var.source_configuration`
+  source_configuration = local.create_access_iam_role ? merge(
+    var.source_configuration,
+    { authentication_configuration = { access_role_arn = aws_iam_role.access[0].arn } }
+  ) : var.source_configuration
+
+  # Ensure VPC connector created is attached even if no values are provided via `var.network_configuration`
+  network_configuration = local.create_vpc_connector ? merge(
+    var.network_configuration,
+    {
+      egress_configuration = {
+        egress_type       = "VPC"
+        vpc_connector_arn = aws_apprunner_vpc_connector.this[0].arn
+      }
+    }
+  ) : var.network_configuration
 }
 
 resource "aws_apprunner_service" "this" {
@@ -35,17 +58,17 @@ resource "aws_apprunner_service" "this" {
   }
 
   dynamic "instance_configuration" {
-    for_each = length(var.instance_configuration) > 0 ? [var.instance_configuration] : []
+    for_each = length(local.instance_configuration) > 0 ? [local.instance_configuration] : []
 
     content {
       cpu               = try(instance_configuration.value.cpu, null)
-      instance_role_arn = var.create_instance_iam_role ? aws_iam_role.instance[0].arn : lookup(instance_configuration.value, "instance_role_arn", null)
+      instance_role_arn = lookup(instance_configuration.value, "instance_role_arn", null)
       memory            = try(instance_configuration.value.memory, null)
     }
   }
 
   dynamic "network_configuration" {
-    for_each = length(var.network_configuration) > 0 ? [var.network_configuration] : []
+    for_each = length(local.network_configuration) > 0 ? [local.network_configuration] : []
 
     content {
       dynamic "ingress_configuration" {
@@ -61,7 +84,7 @@ resource "aws_apprunner_service" "this" {
 
         content {
           egress_type       = try(egress_configuration.value.egress_type, "VPC")
-          vpc_connector_arn = try(egress_configuration.value.vpc_connector_arn, aws_apprunner_vpc_connector.this[0].arn, null)
+          vpc_connector_arn = try(egress_configuration.value.vpc_connector_arn, null)
         }
       }
     }
@@ -78,16 +101,15 @@ resource "aws_apprunner_service" "this" {
 
   service_name = var.service_name
 
-
   dynamic "source_configuration" {
-    for_each = [var.source_configuration]
+    for_each = [local.source_configuration]
 
     content {
       dynamic "authentication_configuration" {
         for_each = try([source_configuration.value.authentication_configuration], [])
 
         content {
-          access_role_arn = var.create_access_iam_role ? aws_iam_role.access[0].arn : try(authentication_configuration.value.access_role_arn, null)
+          access_role_arn = lookup(authentication_configuration.value, "access_role_arn", null)
           connection_arn  = try(authentication_configuration.value.connection_arn, null)
         }
       }
@@ -111,6 +133,7 @@ resource "aws_apprunner_service" "this" {
                   port                          = try(code_configuration_values.value.port, null)
                   runtime                       = code_configuration_values.value.runtime
                   runtime_environment_variables = try(code_configuration_values.value.runtime_environment_variables, {})
+                  runtime_environment_secrets   = try(code_configuration_values.value.runtime_environment_secrets, {})
                   start_command                 = try(code_configuration_values.value.start_command, null)
                 }
               }
@@ -142,6 +165,7 @@ resource "aws_apprunner_service" "this" {
             content {
               port                          = try(image_configuration.value.port, null)
               runtime_environment_variables = try(image_configuration.value.runtime_environment_variables, {})
+              runtime_environment_secrets   = try(image_configuration.value.runtime_environment_secrets, {})
               start_command                 = try(image_configuration.value.start_command, null)
             }
           }
@@ -299,6 +323,79 @@ resource "aws_iam_role_policy_attachment" "instance_additional" {
   for_each = { for k, v in var.instance_iam_role_policies : k => v if local.create_instance_iam_role }
 
   policy_arn = each.value
+  role       = aws_iam_role.instance[0].name
+}
+
+################################################################################
+# IAM Role Policy - Instance
+################################################################################
+
+locals {
+  create_instance_role_policy = local.create_instance_iam_role && length(var.instance_policy_statements) > 0
+}
+
+data "aws_iam_policy_document" "instance" {
+  count = local.create_instance_role_policy ? 1 : 0
+
+  dynamic "statement" {
+    for_each = var.instance_policy_statements
+
+    content {
+      sid           = try(statement.value.sid, statement.key)
+      actions       = try(statement.value.actions, null)
+      not_actions   = try(statement.value.not_actions, null)
+      effect        = try(statement.value.effect, null)
+      resources     = try(statement.value.resources, null)
+      not_resources = try(statement.value.not_resources, null)
+
+      dynamic "principals" {
+        for_each = try(statement.value.principals, [])
+
+        content {
+          type        = principals.value.type
+          identifiers = principals.value.identifiers
+        }
+      }
+
+      dynamic "not_principals" {
+        for_each = try(statement.value.not_principals, [])
+
+        content {
+          type        = not_principals.value.type
+          identifiers = not_principals.value.identifiers
+        }
+      }
+
+      dynamic "condition" {
+        for_each = try(statement.value.conditions, [])
+
+        content {
+          test     = condition.value.test
+          values   = condition.value.values
+          variable = condition.value.variable
+        }
+      }
+    }
+  }
+}
+
+resource "aws_iam_policy" "instance" {
+  count = local.create_instance_role_policy ? 1 : 0
+
+  name        = var.instance_iam_role_use_name_prefix ? null : local.instance_iam_role_name
+  name_prefix = var.instance_iam_role_use_name_prefix ? "${local.instance_iam_role_name}-" : null
+  path        = var.instance_iam_role_path
+  description = var.instance_iam_role_description
+
+  policy = data.aws_iam_policy_document.instance[0].json
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "instance" {
+  count = local.create_instance_role_policy ? 1 : 0
+
+  policy_arn = aws_iam_policy.instance[0].arn
   role       = aws_iam_role.instance[0].name
 }
 

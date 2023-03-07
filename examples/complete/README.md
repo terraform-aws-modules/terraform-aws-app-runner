@@ -10,6 +10,7 @@ Configuration in this directory creates:
 - An image based AppRunner service
   - Utilizes "mega" autoscaling configuration created in shared configs
   - Creates a VPC connector to the associated VPC private subnets
+  - Creates an example runtime environment variable and secret
 
 ## Usage
 
@@ -34,13 +35,13 @@ Note that this example may create resources which will incur monetary charges on
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.38 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.51 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.38 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.51 |
 
 ## Modules
 
@@ -60,6 +61,8 @@ Note that this example may create resources which will incur monetary charges on
 
 | Name | Type |
 |------|------|
+| [aws_secretsmanager_secret.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret_version.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 
 ## Inputs

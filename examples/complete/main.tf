@@ -2,14 +2,19 @@ provider "aws" {
   region = local.region
 }
 
+data "aws_availability_zones" "available" {}
+
 locals {
   region = "us-east-1"
-  name   = "ex-${replace(basename(path.cwd), "_", "-")}"
+  name   = "ex-${basename(path.cwd)}"
+
+  vpc_cidr = "10.0.0.0/16"
+  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
 
   tags = {
-    Name       = local.name
-    Example    = "complete"
-    Repository = "https://github.com/terraform-aws-modules/terraform-aws-app-runner"
+    Example    = local.name
+    GithubRepo = "terraform-aws-app-runner"
+    GithubOrg  = "terraform-aws-modules"
   }
 }
 
@@ -96,11 +101,25 @@ module "app_runner_image_base" {
   # Pulling from shared configs
   auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mega"].arn
 
+  # IAM instance profile permissions to access secrets
+  instance_policy_statements = {
+    GetSecretValue = {
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = [aws_secretsmanager_secret.this.arn]
+    }
+  }
+
   source_configuration = {
     auto_deployments_enabled = false
     image_repository = {
       image_configuration = {
         port = 8000
+        runtime_environment_variables = {
+          MY_VARIABLE = "hello!"
+        }
+        runtime_environment_secrets = {
+          MY_SECRET = aws_secretsmanager_secret.this.arn
+        }
       }
       image_identifier      = "public.ecr.aws/aws-containers/hello-app-runner:latest"
       image_repository_type = "ECR_PUBLIC"
@@ -136,11 +155,25 @@ module "app_runner_private" {
   # Pulling from shared configs
   auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mega"].arn
 
+  # IAM instance profile permissions to access secrets
+  instance_policy_statements = {
+    GetSecretValue = {
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = [aws_secretsmanager_secret.this.arn]
+    }
+  }
+
   source_configuration = {
     auto_deployments_enabled = false
     image_repository = {
       image_configuration = {
         port = 8000
+        runtime_environment_variables = {
+          MY_VARIABLE = "hello!"
+        }
+        runtime_environment_secrets = {
+          MY_SECRET = aws_secretsmanager_secret.this.arn
+        }
       }
       image_identifier      = "public.ecr.aws/aws-containers/hello-app-runner:latest"
       image_repository_type = "ECR_PUBLIC"
@@ -178,13 +211,6 @@ module "app_runner_disabled" {
 ################################################################################
 # Supporting Resources
 ################################################################################
-
-data "aws_availability_zones" "available" {}
-
-locals {
-  vpc_cidr = "10.0.0.0/16"
-  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
-}
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -249,4 +275,14 @@ module "vpc_endpoints_security_group" {
   egress_cidr_blocks = [module.vpc.vpc_cidr_block]
 
   tags = local.tags
+}
+
+resource "aws_secretsmanager_secret" "this" {
+  name_prefix             = local.name
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret_version" "this" {
+  secret_id     = aws_secretsmanager_secret.this.id
+  secret_string = "example"
 }
