@@ -2,14 +2,19 @@ provider "aws" {
   region = local.region
 }
 
+data "aws_availability_zones" "available" {}
+
 locals {
   region = "us-east-1"
-  name   = "ex-${replace(basename(path.cwd), "_", "-")}"
+  name   = "ex-${basename(path.cwd)}"
+
+  vpc_cidr = "10.0.0.0/16"
+  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
 
   tags = {
-    Name       = local.name
-    Example    = "complete"
-    Repository = "https://github.com/terraform-aws-modules/terraform-aws-app-runner"
+    Example    = local.name
+    GithubRepo = "terraform-aws-app-runner"
+    GithubOrg  = "terraform-aws-modules"
   }
 }
 
@@ -96,10 +101,12 @@ module "app_runner_image_base" {
   # Pulling from shared configs
   auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mega"].arn
 
-  # Creating IAM instance profile to access secrets
-  create_instance_iam_role = true
-  instance_iam_role_policies = {
-    secrets_policy = aws_iam_policy.instance_policy.arn
+  # IAM instance profile permissions to access secrets
+  instance_policy_statements = {
+    GetSecretValue = {
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = [aws_secretsmanager_secret.this.arn]
+    }
   }
 
   source_configuration = {
@@ -111,7 +118,7 @@ module "app_runner_image_base" {
           MY_VARIABLE = "hello!"
         }
         runtime_environment_secrets = {
-          MY_SECRET = aws_secretsmanager_secret.example_secret.arn
+          MY_SECRET = aws_secretsmanager_secret.this.arn
         }
       }
       image_identifier      = "public.ecr.aws/aws-containers/hello-app-runner:latest"
@@ -148,10 +155,12 @@ module "app_runner_private" {
   # Pulling from shared configs
   auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mega"].arn
 
-  # Creating IAM instance profile to access secrets
-  create_instance_iam_role = true
-  instance_iam_role_policies = {
-    secrets_policy = aws_iam_policy.instance_policy.arn
+  # IAM instance profile permissions to access secrets
+  instance_policy_statements = {
+    GetSecretValue = {
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = [aws_secretsmanager_secret.this.arn]
+    }
   }
 
   source_configuration = {
@@ -163,7 +172,7 @@ module "app_runner_private" {
           MY_VARIABLE = "hello!"
         }
         runtime_environment_secrets = {
-          MY_SECRET = aws_secretsmanager_secret.example_secret.arn
+          MY_SECRET = aws_secretsmanager_secret.this.arn
         }
       }
       image_identifier      = "public.ecr.aws/aws-containers/hello-app-runner:latest"
@@ -202,13 +211,6 @@ module "app_runner_disabled" {
 ################################################################################
 # Supporting Resources
 ################################################################################
-
-data "aws_availability_zones" "available" {}
-
-locals {
-  vpc_cidr = "10.0.0.0/16"
-  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
-}
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -275,28 +277,12 @@ module "vpc_endpoints_security_group" {
   tags = local.tags
 }
 
-resource "aws_secretsmanager_secret" "example_secret" {
-  name = "FRIENDLY-SECRET-NAME"
-  # The below recovery window is set to 0 to allow instantaneous deletion by Terraform
+resource "aws_secretsmanager_secret" "this" {
+  name_prefix             = local.name
   recovery_window_in_days = 0
 }
-resource "aws_secretsmanager_secret_version" "example_secret_value" {
-  secret_id     = aws_secretsmanager_secret.example_secret.id
-  secret_string = "this is my secret string!"
-}
 
-data "aws_iam_policy_document" "secrets_access_policy_content" {
-  statement {
-    actions = [
-      "secretsmanager:GetSecretValue",
-      "kms:Decrypt*"
-    ]
-    resources = ["*"]
-    effect    = "Allow"
-  }
-}
-
-resource "aws_iam_policy" "instance_policy" {
-  name   = "app-runner-secret-access-policy"
-  policy = data.aws_iam_policy_document.secrets_access_policy_content.json
+resource "aws_secretsmanager_secret_version" "this" {
+  secret_id     = aws_secretsmanager_secret.this.id
+  secret_string = "example"
 }

@@ -167,6 +167,16 @@ variable "instance_iam_role_policies" {
 }
 
 ################################################################################
+# IAM Role Policy - Instance
+################################################################################
+
+variable "instance_policy_statements" {
+  description = "A map of IAM policy [statements](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#statement) for custom permission usage"
+  type        = any
+  default     = {}
+}
+
+################################################################################
 # VPC Ingress Configuration
 ################################################################################
 
