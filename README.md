@@ -104,10 +104,12 @@ module "app_runner_image_base" {
   # From shared configs
   auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mega"].arn
 
-  # Creating IAM instance profile to access secrets
-  create_instance_iam_role = true
-  instance_iam_role_policies = {
-    secrets_policy = aws_iam_policy.instance_policy.arn
+  # IAM instance profile permissions to access secrets
+  instance_policy_statements = {
+    GetSecretValue = {
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = [aws_secretsmanager_secret.this.arn]
+    }
   }
 
   source_configuration = {
@@ -119,7 +121,7 @@ module "app_runner_image_base" {
           MY_VARIABLE = "hello!"
         }
         runtime_environment_secrets = {
-          MY_SECRET = aws_secretsmanager_secret.example_secret.arn
+          MY_SECRET = aws_secretsmanager_secret.this.arn
         }
       }
       image_identifier      = "public.ecr.aws/aws-containers/hello-app-runner:latest"
