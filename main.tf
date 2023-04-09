@@ -8,16 +8,16 @@ locals {
   create_service = var.create && var.create_service
 
   # Ensure instance role created is attached even if no values are provided via `var.instance_configuration`
-  instance_configuration = local.create_instance_iam_role ? merge(
+  instance_configuration = try(local.create_instance_iam_role ? merge(
     var.instance_configuration,
     { instance_role_arn = aws_iam_role.instance[0].arn }
-  ) : var.instance_configuration
+  ) : tomap(false), var.instance_configuration)
 
   # Ensure access role created is attached even if no values are provided via `var.source_configuration`
-  source_configuration = local.create_access_iam_role ? merge(
+  source_configuration = try(local.create_access_iam_role ? merge(
     var.source_configuration,
     { authentication_configuration = { access_role_arn = aws_iam_role.access[0].arn } }
-  ) : var.source_configuration
+  ) : tomap(false), var.source_configuration)
 
   # Ensure VPC connector created is attached even if no values are provided via `var.network_configuration`
   network_configuration = local.create_vpc_connector ? merge(
