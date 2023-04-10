@@ -150,7 +150,7 @@ module "app_runner_image_base" {
 module "app_runner_private_image_base" {
   source = "../.."
 
-  service_name = "${local.name}-image-base"
+  service_name = "${local.name}-private-image-base"
 
   # Pulling from shared configs
   auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["mini"].arn
@@ -167,9 +167,10 @@ module "app_runner_private_image_base" {
       image_repository_type = "ECR"
       image_identifier      = "123456789012.dkr.ecr.us-east-1.amazonaws.com/hello-app-runner:latest"
     }
-    create_access_iam_role = true
-    private_ecr_arn        = "arn:aws:ecr:us-east-1:123456789012:repository/hello-app-runner"
   }
+
+  create_access_iam_role = true
+  private_ecr_arn        = "arn:aws:ecr:us-east-1:123456789012:repository/hello-app-runner"
 
   tags = local.tags
 }
