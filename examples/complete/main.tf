@@ -147,6 +147,33 @@ module "app_runner_image_base" {
   tags = local.tags
 }
 
+module "app_runner_private_image_base" {
+  source = "../.."
+
+  service_name = "${local.name}-image-base"
+
+  # Pulling from shared configs
+  auto_scaling_configuration_arn = module.app_runner_shared_configs.auto_scaling_configurations["min"].arn
+
+  source_configuration = {
+    auto_deployments_enabled = false
+    image_repository = {
+      image_configuration = {
+        port = 8000
+        runtime_environment_variables = {
+          MY_VARIABLE = "hello!"
+        }
+      }
+      create_access_iam_role  = true
+      image_repository_type   = "ECR"
+      image_identifier        = "12345678912.dkr.ecr.us-east-1.amazonaws.com/hello-app-runner:latest"
+      private_ecr_arn         = "arn:aws:ecr:us-east-1:123456789012:repository/hello-app-runner"
+    }
+  }
+
+  tags = local.tags
+}
+
 module "app_runner_private" {
   source = "../.."
 
