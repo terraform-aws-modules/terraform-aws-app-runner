@@ -35,13 +35,13 @@ Note that this example may create resources which will incur monetary charges on
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.51 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.51, < 5.0.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.51 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.51, < 5.0.0 |
 
 ## Modules
 
@@ -54,7 +54,7 @@ Note that this example may create resources which will incur monetary charges on
 | <a name="module_app_runner_shared_configs"></a> [app\_runner\_shared\_configs](#module\_app\_runner\_shared\_configs) | ../.. | n/a |
 | <a name="module_security_group"></a> [security\_group](#module\_security\_group) | terraform-aws-modules/security-group/aws | ~> 4.0 |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | ~> 3.0 |
-| <a name="module_vpc_endpoints"></a> [vpc\_endpoints](#module\_vpc\_endpoints) | terraform-aws-modules/vpc/aws//modules/vpc-endpoints | n/a |
+| <a name="module_vpc_endpoints"></a> [vpc\_endpoints](#module\_vpc\_endpoints) | terraform-aws-modules/vpc/aws//modules/vpc-endpoints | ~>4.0 |
 | <a name="module_vpc_endpoints_security_group"></a> [vpc\_endpoints\_security\_group](#module\_vpc\_endpoints\_security\_group) | terraform-aws-modules/security-group/aws | ~> 4.0 |
 
 ## Resources
