@@ -208,14 +208,14 @@ variable "create_custom_domain_association" {
   default     = false
 }
 
-variable "domain_name" {
-  description = "The custom domain endpoint to association. Specify a base domain e.g., `example.com` or a subdomain e.g., `subdomain.example.com`"
-  type        = string
-  default     = ""
+variable "domain_names" {
+  description = "List of custom domain endpoints to associate with the App Runner service. Specify a base domain e.g., `example.com` or a subdomain e.g., `subdomain.example.com`"
+  type        = list(string)
+  default     = []
 }
 
 variable "enable_www_subdomain" {
-  description = "Whether to associate the subdomain with the App Runner service in addition to the base domain. Defaults to `true`"
+  description = "Whether to add the www. subdomain for each domain name associated with the App Runner service, in addition to the base domain. Defaults to `true`"
   type        = bool
   default     = null
 }

@@ -426,9 +426,9 @@ locals {
 }
 
 resource "aws_apprunner_custom_domain_association" "this" {
-  count = local.create_custom_domain_association ? 1 : 0
+  count = local.create_custom_domain_association ? length(var.domain_names) : 0
 
-  domain_name          = var.domain_name
+  domain_name          = var.domain_names[count.index]
   enable_www_subdomain = var.enable_www_subdomain
   service_arn          = aws_apprunner_service.this[0].arn
 }
