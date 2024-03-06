@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1](https://github.com/terraform-aws-modules/terraform-aws-app-runner/compare/v1.2.0...v1.2.1) (2024-03-06)
+
+
+### Bug Fixes
+
+* Update CI workflow versions to remove deprecated runtime warnings ([#12](https://github.com/terraform-aws-modules/terraform-aws-app-runner/issues/12)) ([1f4ac9c](https://github.com/terraform-aws-modules/terraform-aws-app-runner/commit/1f4ac9c46f2a1cda7845ed93e1bb4792e7d0e768))
+
 ## [1.2.0](https://github.com/terraform-aws-modules/terraform-aws-app-runner/compare/v1.1.1...v1.2.0) (2023-03-07)
 
 
