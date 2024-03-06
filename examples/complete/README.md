@@ -52,10 +52,10 @@ Note that this example may create resources which will incur monetary charges on
 | <a name="module_app_runner_image_base"></a> [app\_runner\_image\_base](#module\_app\_runner\_image\_base) | ../.. | n/a |
 | <a name="module_app_runner_private"></a> [app\_runner\_private](#module\_app\_runner\_private) | ../.. | n/a |
 | <a name="module_app_runner_shared_configs"></a> [app\_runner\_shared\_configs](#module\_app\_runner\_shared\_configs) | ../.. | n/a |
-| <a name="module_security_group"></a> [security\_group](#module\_security\_group) | terraform-aws-modules/security-group/aws | ~> 4.0 |
-| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | ~> 3.0 |
-| <a name="module_vpc_endpoints"></a> [vpc\_endpoints](#module\_vpc\_endpoints) | terraform-aws-modules/vpc/aws//modules/vpc-endpoints | n/a |
-| <a name="module_vpc_endpoints_security_group"></a> [vpc\_endpoints\_security\_group](#module\_vpc\_endpoints\_security\_group) | terraform-aws-modules/security-group/aws | ~> 4.0 |
+| <a name="module_security_group"></a> [security\_group](#module\_security\_group) | terraform-aws-modules/security-group/aws | ~> 5.0 |
+| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | ~> 5.0 |
+| <a name="module_vpc_endpoints"></a> [vpc\_endpoints](#module\_vpc\_endpoints) | terraform-aws-modules/vpc/aws//modules/vpc-endpoints | ~> 5.0 |
+| <a name="module_vpc_endpoints_security_group"></a> [vpc\_endpoints\_security\_group](#module\_vpc\_endpoints\_security\_group) | terraform-aws-modules/security-group/aws | ~> 5.0 |
 
 ## Resources
 
