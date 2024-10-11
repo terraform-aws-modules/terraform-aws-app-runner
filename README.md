@@ -189,7 +189,7 @@ Examples codified under the [`examples`](https://github.com/terraform-aws-module
 
 - [Complete](https://github.com/terraform-aws-modules/terraform-aws-app-runner/tree/master/examples/complete)
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -306,7 +306,7 @@ No modules.
 | <a name="output_vpc_connector_status"></a> [vpc\_connector\_status](#output\_vpc\_connector\_status) | The current state of the VPC connector. If the status of a connector revision is INACTIVE, it was deleted and can't be used. Inactive connector revisions are permanently removed some time after they are deleted |
 | <a name="output_vpc_ingress_connection_arn"></a> [vpc\_ingress\_connection\_arn](#output\_vpc\_ingress\_connection\_arn) | The Amazon Resource Name (ARN) of the VPC Ingress Connection |
 | <a name="output_vpc_ingress_connection_domain_name"></a> [vpc\_ingress\_connection\_domain\_name](#output\_vpc\_ingress\_connection\_domain\_name) | The domain name associated with the VPC Ingress Connection resource |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 ## License
 

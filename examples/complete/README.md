@@ -29,7 +29,7 @@ $ terraform apply -var="repository_url=<URL_TO_FORKED_REPOSITORY>"
 
 Note that this example may create resources which will incur monetary charges on your AWS bill. Run `terraform destroy` when you no longer need these resources.
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -143,6 +143,6 @@ Note that this example may create resources which will incur monetary charges on
 | <a name="output_private_vpc_connector_status"></a> [private\_vpc\_connector\_status](#output\_private\_vpc\_connector\_status) | The current state of the VPC connector. If the status of a connector revision is INACTIVE, it was deleted and can't be used. Inactive connector revisions are permanently removed some time after they are deleted |
 | <a name="output_private_vpc_ingress_connection_arn"></a> [private\_vpc\_ingress\_connection\_arn](#output\_private\_vpc\_ingress\_connection\_arn) | The Amazon Resource Name (ARN) of the VPC Ingress Connection |
 | <a name="output_private_vpc_ingress_connection_domain_name"></a> [private\_vpc\_ingress\_connection\_domain\_name](#output\_private\_vpc\_ingress\_connection\_domain\_name) | The domain name associated with the VPC Ingress Connection resource |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 Apache-2.0 Licensed. See [LICENSE](https://github.com/terraform-aws-modules/terraform-aws-app-runner/blob/master/LICENSE).
