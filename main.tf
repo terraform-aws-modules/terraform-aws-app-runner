@@ -433,60 +433,27 @@ resource "aws_apprunner_custom_domain_association" "this" {
   service_arn          = aws_apprunner_service.this[0].arn
 }
 
-# # Requires manual intervention to validate records
-# # https://github.com/hashicorp/terraform-provider-aws/issues/23460
-# resource "aws_route53_record" "validation" {
-#   count = length(aws_apprunner_custom_domain_association.this[0].certificate_validation_records)
+locals {
+  validation_records = tolist(aws_apprunner_custom_domain_association.this[0].certificate_validation_records)
+}
 
-#   allow_overwrite = true
-#   name            = aws_apprunner_custom_domain_association.this[0].certificate_validation_records.*.name[count.index]
-#   records         = [aws_apprunner_custom_domain_association.this[0].certificate_validation_records.*.value[count.index]]
-#   ttl             = 60
-#   type            = aws_apprunner_custom_domain_association.this[0].certificate_validation_records.*.type[count.index]
-#   zone_id         = var.hosted_zone_id
-# }
+resource "aws_route53_record" "validation_records" {
+  count           = length([var.domain_name]) + 1
+  name            = local.validation_records[count.index].name
+  type            = local.validation_records[count.index].type
+  records         = [local.validation_records[count.index].value]
+  allow_overwrite = true
+  ttl             = 300
+  zone_id         = var.hosted_zone_id
+}
 
-# resource "aws_route53_record" "validation" {
-#   for_each = {
-#     for dvo in aws_apprunner_custom_domain_association.this[0].certificate_validation_records : dvo.name => {
-#       name   = dvo.name
-#       record = dvo.value
-#       type   = dvo.type
-#     } if local.create_custom_domain_association
-#   }
-
-#   allow_overwrite = true
-#   name            = each.value.name
-#   records         = [each.value.record]
-#   ttl             = 60
-#   type            = each.value.type
-#   zone_id         = var.hosted_zone_id
-# }
-
-# resource "aws_route53_record" "cname" {
-#   count = local.create_custom_domain_association && var.domain_name_use_cname ? 1 : 0
-
-#   allow_overwrite = true
-#   name            = var.domain_name
-#   records         = [aws_apprunner_custom_domain_association.this[0].dns_target]
-#   ttl             = 3600
-#   type            = "CNAME"
-#   zone_id         = var.hosted_zone_id
-# }
-
-# resource "aws_route53_record" "alias" {
-#   for_each = { for k, v in toset(["A", "AAAA"]) : k => v if local.create_custom_domain_association && var.domain_name_use_cname }
-
-#   zone_id = var.hosted_zone_id
-#   name    = var.domain_name
-#   type    = each.value
-
-#   alias {
-#     name                   = aws_apprunner_service.this[0].service_url
-#     zone_id                = <TODO> ???
-#     evaluate_target_health = true
-#   }
-# }
+resource "aws_route53_record" "custom_domain" {
+  name    = aws_apprunner_custom_domain_association.this[0].domain_name
+  type    = "CNAME"
+  records = [aws_apprunner_service.this[0].service_url]
+  ttl     = 300
+  zone_id = var.hosted_zone_id
+}
 
 ################################################################################
 # VPC Connector

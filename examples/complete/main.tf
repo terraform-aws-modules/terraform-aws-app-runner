@@ -126,13 +126,12 @@ module "app_runner_image_base" {
     }
   }
 
-  # # Requires manual intervention to validate records
-  # # https://github.com/hashicorp/terraform-provider-aws/issues/23460
-  # create_custom_domain_association = true
-  # hosted_zone_id                   = "<TODO>"
-  # domain_name                      = "<TODO>"
-  # enable_www_subdomain             = true
-
+  # Create a custom domain
+  create_custom_domain_association = true
+  enable_www_subdomain             = false
+  hosted_zone_id                   = var.hosted_zone_id
+  domain_name                      = "*.app.example.com"
+  
   create_vpc_connector          = true
   vpc_connector_subnets         = module.vpc.private_subnets
   vpc_connector_security_groups = [module.security_group.security_group_id]

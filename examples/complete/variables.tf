@@ -3,3 +3,9 @@ variable "repository_url" {
   type        = string
   default     = "https://github.com/aws-containers/hello-app-runner" # clone to your account associated with the GitHub connection
 }
+
+variable "hosted_zone_id" {
+  description = "The Route53 zone ID where the validation records for the custom domain will be created"
+  type        = string
+  default     = "Z0975817WMT8ITN8W25F"
+}
