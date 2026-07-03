@@ -315,7 +315,7 @@ resource "aws_iam_role" "instance" {
 resource "aws_iam_role_policy_attachment" "instance_xray" {
   count = local.create_instance_iam_role && try(var.observability_configuration.value.observability_enabled, false) ? 1 : 0
 
-  policy_arn = "arn:${data.aws_partition.current.id}:iam::aws:policy/AWSXRayDaemonWriteAccess"
+  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AWSXRayDaemonWriteAccess"
   role       = aws_iam_role.instance[0].name
 }
 
