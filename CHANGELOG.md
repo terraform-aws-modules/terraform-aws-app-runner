@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.3](https://github.com/terraform-aws-modules/terraform-aws-app-runner/compare/v1.2.2...v1.2.3) (2026-08-26)
+
+### Bug Fixes
+
+* Update GitHub Actions and pre-commit hook versions ([#21](https://github.com/terraform-aws-modules/terraform-aws-app-runner/issues/21)) ([162248f](https://github.com/terraform-aws-modules/terraform-aws-app-runner/commit/162248f2edfce980b57ad243e91373da9124dc69))
+
 ## [1.2.2](https://github.com/terraform-aws-modules/terraform-aws-app-runner/compare/v1.2.1...v1.2.2) (2025-10-21)
 
 ### Bug Fixes
