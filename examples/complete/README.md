@@ -33,20 +33,20 @@ Note that this example may create resources which will incur monetary charges on
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.51 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.51 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_app_runner_code_base"></a> [app\_runner\_code\_base](#module\_app\_runner\_code\_base) | ../.. | n/a |
 | <a name="module_app_runner_disabled"></a> [app\_runner\_disabled](#module\_app\_runner\_disabled) | ../.. | n/a |
 | <a name="module_app_runner_image_base"></a> [app\_runner\_image\_base](#module\_app\_runner\_image\_base) | ../.. | n/a |
@@ -60,7 +60,7 @@ Note that this example may create resources which will incur monetary charges on
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_secretsmanager_secret.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret_version.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
@@ -68,13 +68,13 @@ Note that this example may create resources which will incur monetary charges on
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_repository_url"></a> [repository\_url](#input\_repository\_url) | Location of the repository that contains the source code. Repository must be located in same scope as the GitHub connection (user's profile or organization) | `string` | `"https://github.com/aws-containers/hello-app-runner"` | no |
 
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_auto_scaling_configurations"></a> [auto\_scaling\_configurations](#output\_auto\_scaling\_configurations) | Map of attribute maps for all autosclaing configurations created |
 | <a name="output_code_base_access_iam_role_arn"></a> [code\_base\_access\_iam\_role\_arn](#output\_code\_base\_access\_iam\_role\_arn) | The Amazon Resource Name (ARN) specifying the IAM role |
 | <a name="output_code_base_access_iam_role_name"></a> [code\_base\_access\_iam\_role\_name](#output\_code\_base\_access\_iam\_role\_name) | The name of the IAM role |
