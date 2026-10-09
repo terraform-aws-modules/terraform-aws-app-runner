@@ -258,6 +258,8 @@ resource "aws_iam_policy" "access" {
   description = var.access_iam_role_description
 
   policy = data.aws_iam_policy_document.access[0].json
+
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "access" {
