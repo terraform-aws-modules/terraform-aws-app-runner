@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.4](https://github.com/terraform-aws-modules/terraform-aws-app-runner/compare/v1.2.3...v1.2.4) (2026-11-17)
+
+### Bug Fixes
+
+* Add missing `tags` to `access` IAM policy ([#22](https://github.com/terraform-aws-modules/terraform-aws-app-runner/issues/22)) ([f3a5643](https://github.com/terraform-aws-modules/terraform-aws-app-runner/commit/f3a5643fb58120222e0f19faafb270b6d352b2ce))
+
 ## [1.2.3](https://github.com/terraform-aws-modules/terraform-aws-app-runner/compare/v1.2.2...v1.2.3) (2026-08-26)
 
 ### Bug Fixes
